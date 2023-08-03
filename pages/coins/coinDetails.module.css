@@ -1,0 +1,7 @@
+.test{
+cursor: pointer;
+}
+
+.test:hover{
+ background-color: goldenrod;
+}
