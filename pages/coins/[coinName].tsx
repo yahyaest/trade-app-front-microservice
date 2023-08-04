@@ -44,7 +44,8 @@ const CoinDetailPage: Page = (props: any) => {
   const HandleBuyButton = async () => {
     try {
       const token = Cookies.get("token") as string;
-      const wallets = await getUserWallets(token);
+      let wallets: Wallet[] = await getUserWallets(token);
+      wallets = wallets.filter(wallet => wallet.type === "CRYPTO")
       setUserWallets(wallets);
       setIsModal(true);
     } catch (error: any) {
