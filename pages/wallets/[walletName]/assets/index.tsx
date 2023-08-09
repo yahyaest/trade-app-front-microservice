@@ -41,7 +41,7 @@ const AssetsPage: Page = (props: any) => {
   const items = assets
     ? [
         { label: `wallets`, url: "/wallets" },
-        { label: `${walletName}` },
+        { label: `${walletName}`, url: `/wallets/${walletName}` },
         { label: `assets` },
       ]
     : null;

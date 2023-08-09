@@ -45,7 +45,7 @@ const TransactionsPage: Page = (props: any) => {
   const items = transactions
     ? [
         { label: `wallets`, url: "/wallets" },
-        { label: `${walletName}` },
+        { label: `${walletName}`, url: `/wallets/${walletName}` },
         { label: `transactions` },
       ]
     : null;

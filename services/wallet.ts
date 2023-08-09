@@ -61,6 +61,37 @@ export const getAssets = async (token: string, query: any) => {
   }
 };
 
+export const getAssetsByQuery = async (token: string, query:any) => {
+  try {
+    let queryParams = "";
+    if (query) {
+      queryParams = "?";
+      for (let key of Object.keys(query)) {
+        queryParams = queryParams + `${key}=${query[key]}&`;
+      }
+      queryParams = queryParams.slice(0, -1);
+    }
+
+    const walletBaseUrl = process.env.WALLET_BASE_URL;
+    const assetsUrl = `${walletBaseUrl}/api/assets/${queryParams}`;
+
+    if (!token) {
+      throw Error("No token was provided. Failed to get wallets data");
+    }
+    const options: any = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const assetsRersponse = await axios.get(assetsUrl, options);
+    const assets = assetsRersponse.data;
+    return assets;
+  } catch (error) {
+    console.error("Error fetching assets:", error);
+  }
+};
+
 
 export const getUserWallets = async (token: string) => {
   try {
@@ -79,6 +110,28 @@ export const getUserWallets = async (token: string) => {
     const walletsRersponse = await axios.get(walletsUrl, options);
     const wallets = walletsRersponse.data;
     return wallets;
+  } catch (error) {
+    console.error("Error fetching wallets:", error);
+  }
+};
+
+export const getWalletByName = async (token: string, walletName:string) => {
+  try {
+    const walletBaseUrl = process.env.WALLET_BASE_URL;
+    const walletsUrl = `${walletBaseUrl}/api/wallets/?name=${walletName}`;
+
+    if (!token) {
+      throw Error("No token was provided. Failed to get wallets data");
+    }
+    const options: any = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const walletsRersponse = await axios.get(walletsUrl, options);
+    let wallets = walletsRersponse.data;
+    return wallets[0];
   } catch (error) {
     console.error("Error fetching wallets:", error);
   }
