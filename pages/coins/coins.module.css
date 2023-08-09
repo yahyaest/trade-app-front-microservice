@@ -1,0 +1,61 @@
+.card {
+  width: 400px;
+  max-width: 500px;
+  min-width: 300px;
+  height: 250px;
+  cursor: pointer;
+  border-radius: 25px !important;
+  border: 1px solid silver !important;
+  background: whitesmoke;
+  z-index: 5;
+  transition: all 0.5s;
+  position: relative; /* Make sure the card is a positioned container */
+}
+
+.cardOverlay {
+  /* Additional element for the overlay with the background image */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-position: center center;
+  background-size: 90% 90%;
+  background-repeat: no-repeat;
+  filter: blur(2px); /* Apply the blur filter to the overlay */
+  z-index: -1; /* Position the overlay behind the card content */
+  pointer-events: none; /* Allow click events to pass through the overlay to the card content */
+  transition: transform 0.5s, opacity 0.5s; /* Add transition for smooth hover effect */
+  opacity: 0.5 !important; /* Set the desired opacity for the overlay */
+}
+
+.card:hover .cardOverlay {
+  /* Scale up the overlay slightly on hover */
+  transform: scale(3);
+  opacity: 1 !important; /* Increase the opacity on hover, if desired */
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card h5 {
+  text-shadow: -1px 1px 0 #dcdcdc, 1px 1px 0 #dcdcdc, 1px -1px 0 #dcdcdc,
+    -1px -1px 0 #dcdcdc;
+}
+
+.card h6 {
+  text-shadow: -1px 1px 0 #dcdcdc, 1px 1px 0 #dcdcdc, 1px -1px 0 #dcdcdc,
+    -1px -1px 0 #dcdcdc;
+}
+
+.card p {
+  font-size: small;
+  text-shadow: -1px 1px 0 #dcdcdc, 1px 1px 0 #dcdcdc, 1px -1px 0 #dcdcdc,
+    -1px -1px 0 #dcdcdc;
+}
+
+.card img {
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid #ddd;
+}

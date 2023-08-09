@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import { Toast } from "primereact/toast";
 import { CryptoCoin } from "@/models/cryptoCoin";
 import { BreadCrumb } from "primereact/breadcrumb";
+import styles from "./coins.module.css";
 
 const CoinsPage: Page = (props: any) => {
   const { error } = props;
@@ -59,13 +60,56 @@ const CoinsPage: Page = (props: any) => {
     }
   };
 
-  const coinCard = (coin: CryptoCoin) => {
-    return (
+  const cardStyle = (coin: CryptoCoin) => {
+    return {
+      container: {
+        position: "relative",
+      },
+      card: {
+        position: "relative",
+        width: "400px",
+        "max-width": "500px",
+        "min-width": "300px",
+        height: "250px",
+        cursor: "pointer",
+        "border-radius": "25px !important",
+        transition: "all 0.5s",
+        overflow: "hidden",
+      },
+      before: {
+        position: "absolute",
+        top: "0",
+        left: "0",
+        background: `url(${coin.iconUrl})`,
+        "background-size": "cover",
+        filter: "blur(5px)",
+        // transform: "scale(3)",
+        content: '""',
+      },
+    };
+  };
+
+  
+
+const coinCard = (coin: CryptoCoin) => {
+  return (
+    <div
+      className={`${styles.card} border-1 surface-border border-round m-5 text-center flex flex-column justify-content-center align-items-center`}
+      style={{
+        position: "relative",
+        overflow: "hidden", // Hide any overflow from the overlay
+      }}
+      key={coin.id}
+      onClick={() => router.push(`/coins/${coin.name}`)}
+    >
+      {/* Overlay with blur effect */}
       <div
-        className="border-1 surface-border border-round m-3 text-center py-5 px-3"
-        style={{ width: "400px", maxWidth: "400px" }}
-        key={coin.id}
-      >
+        className={styles.cardOverlay}
+        style={{ backgroundImage: `url(${coin.iconUrl})`, opacity: 0.8 }} // Set initial opacity to less than 1
+      ></div>
+
+      {/* Main card content */}
+      <div className={styles.cardContent}>
         <div className="mb-3 flex flex-row flex-wrap align-items-center justify-content-center">
           <h5 className="mb-1">
             {coin.name} ({coin.symbol})
@@ -78,10 +122,13 @@ const CoinsPage: Page = (props: any) => {
             style={{ verticalAlign: "middle" }}
           />
         </div>
-        <h6 className="mt-0 mb-3">Price : ${(+coin.price).toFixed(3)}</h6>
+        <h6 className="mt-0 mb-3">
+          <strong>Price</strong> : ${(+coin.price).toFixed(3)}
+        </h6>
         <div className="mt-0 mb-3 text-center flex flex-row flex-wrap align-items-center justify-content-center">
-          <h6 className="mr-4 mt-3">
-            Last update : {coin.updatedAt.replace("T", " ").split(".")[0]}
+          <h6 className="mr-4 mt-3 flex align-items-center justify-content-center">
+            <strong>Last update </strong>
+            <p> : {coin.updatedAt.replace("T", " ").split(".")[0]}</p>
           </h6>
           <Button
             style={{ width: "30px", height: "30px" }}
@@ -95,20 +142,12 @@ const CoinsPage: Page = (props: any) => {
           />
         </div>
         <Tag value={`Rank #${coin.rank}`} severity="success"></Tag>
-        <div className="mt-3">
-          <Button
-            label="Visit"
-            severity="info"
-            size="small"
-            rounded
-            outlined
-            raised
-            onClick={() => router.push(`/coins/${coin.name}`)}
-          />
-        </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
+
+
 
   useEffect(() => {
     if (coinsList) setLoading(false);
@@ -137,7 +176,7 @@ const CoinsPage: Page = (props: any) => {
       <h1>Coins Page</h1>
       <Toast ref={toast} />
       <BreadCrumb model={items as any} home={home} className="mb-3" />
-      <div className="flex flex-row flex-wrap align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
+      <div className="flex flex-row flex-wrap align-items-center justify-content-center mx-3">
         {coinsList
           .sort((a: CryptoCoin, b: CryptoCoin) => a.rank - b.rank)
           .map((coin: CryptoCoin) => coinCard(coin))}
