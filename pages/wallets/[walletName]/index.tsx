@@ -5,7 +5,6 @@ import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { useRouter } from "next/router";
 import { Toast } from "primereact/toast";
-import { DataView } from "primereact/dataview";
 import {
   getAssets,
   getAssetsByQuery,
@@ -13,22 +12,52 @@ import {
   getWalletByName,
 } from "@/services";
 import { Wallet } from "@/models/wallet";
-import { Tag } from "primereact/tag";
-import AddWalletModal from "@/components/addWalletModal";
 import { Page } from "../../../types/types";
 import AppConfig from "../../../layout/AppConfig";
 import "primeflex/primeflex.css";
-import { formatCurrency } from "@/utils/utils";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Transaction } from "@/models/transaction";
 import { Asset } from "@/models/asset";
+import AssetDataTable from "@/components/assetDataTable";
+import TransactionDataTable from "@/components/transactionDataTable";
+import { Chart } from "primereact/chart";
+import PieChart from "@/components/pieChart";
 
 const WalletPage: Page = (props: any) => {
-  const { error } = props;
+  const { symbols, walletCoinList, error } = props;
   const wallet: Wallet = props.wallet;
   const walletTransactions: Transaction[] = props.walletTransactions;
   const walletAssets: Asset[] = props.walletAssets;
   const { lastWeekTransactionsNumber, lastWeekAssetsNumber } = props;
+  const [bestAssets, setBestAssets] = useState<Asset[]>([]);
+  const [leastAssets, setLeastAssets] = useState<Asset[]>([]);
+
+  const setBestAndLeastAssetsGain = () => {
+    const soldAssets = walletAssets.filter(
+      (asset) => asset.boughtAmount === asset.soldAmount
+    );
+
+    for (let asset of soldAssets) {
+      const gain = (
+        ((+asset.soldAt - +asset.boughtAt) / +asset.boughtAt) *
+        100
+      ).toFixed(2);
+      asset.gain = gain;
+    }
+
+    const gainAssets = soldAssets
+      .sort((a: Asset, b: Asset) => +b.gain - +a.gain)
+      .slice(0, 5)
+      .filter((asset) => +asset.gain > 0);
+
+    const lostAssets = soldAssets
+      .sort((a: Asset, b: Asset) => +a.gain - +b.gain)
+      .slice(0, 5)
+      .filter((asset) => +asset.gain <= 0);
+
+    setBestAssets(gainAssets);
+    setLeastAssets(lostAssets);
+  };
 
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -93,6 +122,7 @@ const WalletPage: Page = (props: any) => {
 
   useEffect(() => {
     if (wallet) setLoading(false);
+    setBestAndLeastAssetsGain();
   }, []);
 
   if (error) {
@@ -119,8 +149,54 @@ const WalletPage: Page = (props: any) => {
         <h1>Wallet Page</h1>
         <Toast ref={toast} />
         <BreadCrumb model={items as any} home={home} className="mb-3" />
+        <div className="flex align-items-center justify-content-end">
+          <Button
+            label="Transactions"
+            severity="info"
+            size="small"
+            rounded
+            className="mr-5 mb-5"
+            onClick={() => router.push(`/wallets/${wallet.name}/transactions`)}
+          />
+          <Button
+            label="Assets"
+            severity="info"
+            size="small"
+            rounded
+            className="mr-5 mb-5"
+            onClick={() => router.push(`/wallets/${wallet.name}/assets`)}
+          />
+        </div>
         <div className="flex align-items-center justify-content-center text-center">
           {cardsInfo.map((card) => infoCard(card))}
+        </div>
+        <div className="flex flex-column align-items-center justify-content-center text-center">
+          <div className="card ">
+            <h3> Coin In Stock</h3>
+            <PieChart walletCoinList={walletCoinList} />
+          </div>
+          <div className="card">
+            <h3> Top 5 Gain Assets</h3>
+            <AssetDataTable assets={bestAssets} HandleSellButton={null} />
+          </div>
+          <div className="card">
+            <h3> Top 5 Loss Assets</h3>
+            <AssetDataTable assets={leastAssets} HandleSellButton={null} />
+          </div>
+          <div className="card">
+            <h3> Lastest 5 Transactions</h3>
+            <TransactionDataTable
+              transactions={walletTransactions
+                .sort(
+                  (a: Transaction, b: Transaction) =>
+                    ((new Date(b.createdAt) as any) -
+                      new Date(a.createdAt)) as any
+                )
+                .slice(0, 5)}
+              symbols={symbols}
+              displayHeader={false}
+            />
+          </div>
         </div>
       </div>
     </React.Fragment>
@@ -151,21 +227,60 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       };
     }
 
+    // get user wallet
     const walletName = context.params.walletName;
     const wallet: Wallet = await getWalletByName(token, walletName);
 
-    const transactionQuery = { wallet: walletName };
-    const walletTransactions: Transaction[] = await getTransactions(
+    // get wallet transactions
+    const transactionQuery = { coinImage: true, wallet: walletName };
+    let walletTransactions: Transaction[] = await getTransactions(
       token,
       transactionQuery
     );
 
+    let symbols = [];
+
+    for (let transaction of walletTransactions
+      .sort(
+        (a: Transaction, b: Transaction) =>
+          ((new Date(b.createdAt) as any) - new Date(a.createdAt)) as any
+      )
+      .slice(0, 5)) {
+      let symbol = {
+        name: transaction.symbol,
+        coinImage: transaction.coinImage,
+      };
+      if (
+        symbols.filter((symbol) => symbol.name === transaction.symbol)
+          .length === 0
+      ) {
+        symbols.push(symbol);
+      }
+
+      transaction.symbol = symbol;
+      transaction.totalValue = transaction.value;
+      transaction.date = transaction.createdAt;
+      delete transaction.value;
+    }
+
+    // get wallet assets
     const assetQuery = { name: walletName };
     const walletAssets: Asset[] | undefined = await getAssets(
       token,
       assetQuery
     );
 
+    let walletCoinList = [];
+    for (let asset of walletAssets!) {
+      if (asset.boughtAmount - asset.soldAmount > 0) {
+        walletCoinList.push({
+          name: asset.name,
+          count: asset.boughtAmount - asset.soldAmount,
+        });
+      }
+    }
+
+    // get wallet transactions and assets by date
     const lastWeekTransactionQuery = { wallet: walletName, days: "7" };
     const lastWeekWalletTransactions: Transaction[] = await getTransactions(
       token,
@@ -185,6 +300,8 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
         walletAssets,
         lastWeekTransactionsNumber: lastWeekWalletTransactions.length,
         lastWeekAssetsNumber: lastWeekWalletAssets.length,
+        symbols,
+        walletCoinList,
         error: null,
       },
     };

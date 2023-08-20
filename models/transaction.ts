@@ -1,6 +1,6 @@
 export interface Transaction {
   id: number;
-  createdAt?: string;
+  createdAt: string;
   username: string;
   wallet: string;
   name: string;

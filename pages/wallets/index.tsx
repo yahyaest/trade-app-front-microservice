@@ -86,26 +86,17 @@ const WalletsPage: Page = (props: any) => {
               </div>
             </div>
             <div className="flex sm:flex-column align-items-center sm:align-items-end gap-3 sm:gap-2">
-              <span className="text-2xl font-semibold">
+              <span className="text-2xl font-semibold mt-3">
                 {formatCurrency(wallet.currentValue)}
               </span>
               <Button
-                label="Transactions"
+              className= "mt-3"
+                label="Wallet Dashboard"
                 size="small"
-                icon="pi pi-arrows-h"
-                severity="secondary"
+                icon="pi pi-wallet"
+                severity="danger"
                 onClick={() => {
-                  router.push(`/wallets/${wallet.name}/transactions`);
-                }}
-                rounded
-              ></Button>
-              <Button
-                label="Assets"
-                size="small"
-                icon="pi pi-chart-bar"
-                severity="warning"
-                onClick={() => {
-                  router.push(`/wallets/${wallet.name}/assets`);
+                  router.push(`/wallets/${wallet.name}`);
                 }}
                 rounded
               ></Button>

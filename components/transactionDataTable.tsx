@@ -14,7 +14,7 @@ import { Dropdown } from "primereact/dropdown";
 
 export default function TransactionDataTable(props: any) {
   const transactions: Transaction[] = props.transactions;
-  const { symbols  } = props;
+  const { symbols, displayHeader  } = props;
   const [loading, setLoading] = useState<boolean>(true);
   const [filters, setFilters] = useState<DataTableFilterMeta>({});
   const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -314,7 +314,7 @@ export default function TransactionDataTable(props: any) {
         loading={loading}
         responsiveLayout="scroll"
         emptyMessage="No Transactions found."
-        header={header}
+        header={displayHeader ? header : null}
       >
         <Column
           field="wallet"

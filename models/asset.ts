@@ -14,4 +14,5 @@ export interface Asset {
   soldAmount: number;
   transactions: Transaction[];
   type: "CRYPTO" | "STOCK" | "FOREX";
+  gain: string
 }

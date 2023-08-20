@@ -52,8 +52,12 @@ const TransactionsPage: Page = (props: any) => {
             <h5>Transactions Page</h5>
             <BreadCrumb model={items as any} home={home} className="mb-3" />
             <TransactionDataTable
-              transactions={transactions}
+              transactions={transactions.sort(
+                (a: Transaction, b: Transaction) =>
+                  new Date(b.createdAt) as any - new Date(a.createdAt) as any
+              )}
               symbols={symbols}
+              displayHeader={true}
             />
           </div>
         </div>
@@ -110,7 +114,6 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       transaction.totalValue = transaction.value;
       transaction.date = transaction.createdAt;
       delete transaction.value;
-      delete transaction.createdAt;
     }
 
     return {
