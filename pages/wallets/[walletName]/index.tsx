@@ -8,6 +8,8 @@ import { Toast } from "primereact/toast";
 import {
   getAssets,
   getAssetsByQuery,
+  getCoin,
+  getCoinByName,
   getTransactions,
   getWalletByName,
 } from "@/services";
@@ -20,11 +22,12 @@ import { Transaction } from "@/models/transaction";
 import { Asset } from "@/models/asset";
 import AssetDataTable from "@/components/assetDataTable";
 import TransactionDataTable from "@/components/transactionDataTable";
-import { Chart } from "primereact/chart";
 import PieChart from "@/components/pieChart";
+import { CryptoCoin } from "@/models/cryptoCoin";
+import { formatCurrency } from "@/utils/utils";
 
 const WalletPage: Page = (props: any) => {
-  const { symbols, walletCoinList, error } = props;
+  const { symbols, walletCoinList, nonSoldAssetsValue, error } = props;
   const wallet: Wallet = props.wallet;
   const walletTransactions: Transaction[] = props.walletTransactions;
   const walletAssets: Asset[] = props.walletAssets;
@@ -69,6 +72,15 @@ const WalletPage: Page = (props: any) => {
     : null;
   const home = { icon: "pi pi-home", label: "icons", url: "/" };
 
+  const walletCardInfo = {
+    label : "Wallet Balance",
+    currentValue :formatCurrency(wallet.currentValue) ,
+    intialValue : formatCurrency(wallet.intialValue),
+    nonSoldAssetsValue : formatCurrency(nonSoldAssetsValue),
+    allAssetsValue : formatCurrency(+wallet.currentValue + nonSoldAssetsValue),
+    margin: ((+wallet.currentValue + nonSoldAssetsValue - +wallet.intialValue) / +wallet.intialValue * 100).toFixed(2)
+  }
+
   const cardsInfo = [
     {
       label: "Coins",
@@ -94,7 +106,7 @@ const WalletPage: Page = (props: any) => {
         key={card.label}
         className="border-1 surface-border border-round m-5 text-center flex flex-column justify-content-center align-items-center"
         style={{
-          width: "400px",
+          width: "350px",
           maxWidth: "500px",
           minWidth: "300px",
           height: "250px",
@@ -107,6 +119,32 @@ const WalletPage: Page = (props: any) => {
         <h3>{card.label}</h3>
         <h4>{card.number}</h4>
         <p>{card.lastWeek} since last week</p>
+      </div>
+    );
+  };
+
+  const walletCard = (card: any) => {
+    return (
+      <div
+        key={card.label}
+        className="border-1 surface-border border-round m-5 text-center flex flex-column justify-content-center align-items-center"
+        style={{
+          width: "400px",
+          maxWidth: "500px",
+          minWidth: "300px",
+          height: "350px",
+          cursor: "pointer",
+          borderRadius: "25px !important",
+          border: "1px solid silver !important",
+          background: "whitesmoke",
+        }}
+      >
+        <h3>{card.label}</h3>
+        <h6>Intial Wallet Value : {card.intialValue}</h6>
+        <h6>Current Wallet Value : {card.currentValue}</h6>
+        <h6>Non Sold Assets Value : {card.nonSoldAssetsValue}</h6>
+        <h6>Current Wallet + Non Sold Assets : {card.allAssetsValue}</h6>
+        <h6>Margin : {card.margin} %</h6>
       </div>
     );
   };
@@ -168,6 +206,7 @@ const WalletPage: Page = (props: any) => {
           />
         </div>
         <div className="flex align-items-center justify-content-center text-center">
+          {walletCard(walletCardInfo)}
           {cardsInfo.map((card) => infoCard(card))}
         </div>
         <div className="flex flex-column align-items-center justify-content-center text-center">
@@ -175,16 +214,16 @@ const WalletPage: Page = (props: any) => {
             <h3> Coin In Stock</h3>
             <PieChart walletCoinList={walletCoinList} />
           </div>
-          <div className="card">
-            <h3> Top 5 Gain Assets</h3>
+          {bestAssets.length > 0 && <div className="card">
+            <h3> Top Gain Assets</h3>
             <AssetDataTable assets={bestAssets} HandleSellButton={null} />
-          </div>
-          <div className="card">
-            <h3> Top 5 Loss Assets</h3>
+          </div>}
+          {leastAssets.length > 0 && <div className="card">
+            <h3> Top Loss Assets</h3>
             <AssetDataTable assets={leastAssets} HandleSellButton={null} />
-          </div>
-          <div className="card">
-            <h3> Lastest 5 Transactions</h3>
+          </div>}
+          {walletTransactions.length > 0 && <div className="card">
+            <h3> Lastest Transactions</h3>
             <TransactionDataTable
               transactions={walletTransactions
                 .sort(
@@ -196,7 +235,7 @@ const WalletPage: Page = (props: any) => {
               symbols={symbols}
               displayHeader={false}
             />
-          </div>
+          </div>}
         </div>
       </div>
     </React.Fragment>
@@ -263,7 +302,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       delete transaction.value;
     }
 
-    // get wallet assets
+    // get wallet assets and calculate non sold assets values
     const assetQuery = { name: walletName };
     const walletAssets: Asset[] | undefined = await getAssets(
       token,
@@ -271,12 +310,29 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
     );
 
     let walletCoinList = [];
+    let nonSoldAssetsValue = 0
     for (let asset of walletAssets!) {
       if (asset.boughtAmount - asset.soldAmount > 0) {
         walletCoinList.push({
           name: asset.name,
           count: asset.boughtAmount - asset.soldAmount,
         });
+
+        // Check if coin is updated in the last hour in order to minimize coinranking api usage
+        const assetCoin : CryptoCoin = await getCoinByName(token, asset.name)
+        const currentTime = new Date();
+        const coinLastUpdateTime = new Date(assetCoin.updatedAt);
+        const timeDifference = currentTime - coinLastUpdateTime;
+        const hoursDifference = timeDifference / (1000 * 60 * 60);
+
+        if (hoursDifference > 1) {
+          const currentCoin : CryptoCoin = await getCoin(token, assetCoin.id)
+          nonSoldAssetsValue = nonSoldAssetsValue + (asset.boughtAmount - asset.soldAmount) * +currentCoin.price
+        }
+        else{
+          nonSoldAssetsValue = nonSoldAssetsValue + (asset.boughtAmount - asset.soldAmount) * +assetCoin.price
+        }
+
       }
     }
 
@@ -302,6 +358,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
         lastWeekAssetsNumber: lastWeekWalletAssets.length,
         symbols,
         walletCoinList,
+        nonSoldAssetsValue,
         error: null,
       },
     };
