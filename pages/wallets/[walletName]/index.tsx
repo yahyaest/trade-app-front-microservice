@@ -38,6 +38,8 @@ const WalletPage: Page = (props: any) => {
   const { lastWeekTransactionsNumber, lastWeekAssetsNumber } = props;
   const [bestAssets, setBestAssets] = useState<Asset[]>([]);
   const [leastAssets, setLeastAssets] = useState<Asset[]>([]);
+  const margin = ((+wallet.currentValue + nonSoldAssetsValue - +wallet.intialValue) / +wallet.intialValue * 100).toFixed(2)
+  const marginUSD = +wallet.intialValue / 100 * Math.abs(margin)
 
   const setBestAndLeastAssetsGain = () => {
     const soldAssets = walletAssets.filter(
@@ -82,7 +84,7 @@ const WalletPage: Page = (props: any) => {
     intialValue : formatCurrency(wallet.intialValue),
     nonSoldAssetsValue : formatCurrency(nonSoldAssetsValue),
     allAssetsValue : formatCurrency(+wallet.currentValue + nonSoldAssetsValue),
-    margin: ((+wallet.currentValue + nonSoldAssetsValue - +wallet.intialValue) / +wallet.intialValue * 100).toFixed(2)
+    margin: margin
   }
 
   const cardsInfo = [
@@ -230,16 +232,20 @@ const WalletPage: Page = (props: any) => {
             {/* Dashboard PieCharts */}
             <div className="flex flex-column align-items-center justify-content-center text-center mx-5">
               <div className="card ">
-                <h3> Coin In Stock</h3>
-                <PieChart pieData={walletCoinList} />
-              </div>
-              <div className="card ">
                 <h3> Balance</h3>
                 <PieChart pieData={[
-                  {name: "Intial Value", value:parseFloat(wallet.intialValue).toFixed(2)},
-                  {name: "Current Value",value:parseFloat(wallet.currentValue).toFixed(2)},
-                  {name: "Non Sold Assets Value ",value:nonSoldAssetsValue.toFixed(2)}
+                  {name: "Intial Value ($)", value:parseFloat(wallet.intialValue).toFixed(2)},
+                  {name: "Current Value ($)",value:parseFloat(wallet.currentValue).toFixed(2)},
+                  {name: "Non Sold Assets Value ($) ",value:nonSoldAssetsValue.toFixed(2)}
                   ]} />
+                  <h5 style={{
+                    color: margin > 0 ? "green" : "red"
+                  }}
+                  >{margin > 0 ? "Gain" : "Loss"} : {margin} % ({marginUSD} $)</h5>
+              </div>
+              <div className="card ">
+                <h3> Coin In Stock</h3>
+                <PieChart pieData={walletCoinList} />
               </div>
             </div>
           </div>
