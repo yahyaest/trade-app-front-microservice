@@ -18,6 +18,8 @@ import { Page } from "../../../types/types";
 import AppConfig from "../../../layout/AppConfig";
 import "primeflex/primeflex.css";
 import { BreadCrumb } from "primereact/breadcrumb";
+import { Avatar } from 'primereact/avatar';
+import { AvatarGroup } from 'primereact/avatargroup';
 import { Transaction } from "@/models/transaction";
 import { Asset } from "@/models/asset";
 import AssetDataTable from "@/components/assetDataTable";
@@ -25,6 +27,8 @@ import TransactionDataTable from "@/components/transactionDataTable";
 import PieChart from "@/components/pieChart";
 import { CryptoCoin } from "@/models/cryptoCoin";
 import { formatCurrency } from "@/utils/utils";
+import styles from "./walletDashboard.module.css";
+
 
 const WalletPage: Page = (props: any) => {
   const { symbols, walletCoinList, nonSoldAssetsValue, error } = props;
@@ -82,20 +86,22 @@ const WalletPage: Page = (props: any) => {
   }
 
   const cardsInfo = [
-    {
-      label: "Coins",
-      number: walletAssets.length,
-      lastWeek: lastWeekAssetsNumber,
-    },
+    // {
+    //   label: "Coins",
+    //   number: walletAssets.length,
+    //   data: walletAssets,
+    //   lastWeek: lastWeekAssetsNumber,
+    // },
     {
       label: "Assets",
       number: walletAssets.length,
+      data: walletAssets,
       lastWeek: lastWeekAssetsNumber,
     },
-    ,
     {
       label: "Transactions",
       number: walletTransactions.length,
+      data: walletTransactions,
       lastWeek: lastWeekTransactionsNumber,
     },
   ];
@@ -104,20 +110,21 @@ const WalletPage: Page = (props: any) => {
     return (
       <div
         key={card.label}
-        className="border-1 surface-border border-round m-5 text-center flex flex-column justify-content-center align-items-center"
-        style={{
-          width: "350px",
-          maxWidth: "500px",
-          minWidth: "300px",
-          height: "250px",
-          cursor: "pointer",
-          borderRadius: "25px !important",
-          border: "1px solid silver !important",
-          background: "whitesmoke",
-        }}
+        className={`${styles.infoCard} m-5 text-center flex flex-column justify-content-center align-items-center`}
       >
         <h3>{card.label}</h3>
         <h4>{card.number}</h4>
+        <div className="flex justify-content-center mb-3">
+            <AvatarGroup>
+              {card.data.sort(
+                    (a: Transaction, b: Transaction) =>
+                      ((new Date(b.createdAt) as any) -
+                        new Date(a.createdAt)) as any
+                  ).slice(0,4).map((e : Asset | Transaction) => {if("walletId" in e){ return <Avatar key={e.id} image={`${e.transactions[0].coinImage}`} size="large" shape="circle" />} else return <Avatar key={e.id} image={`${e.coinImage}`} size="large" shape="circle" /> })}
+              <Avatar label={`+${card.data.length - 4}`} shape="circle" size="large" style={{ backgroundColor: '#9c27b0', color: '#ffffff' }} />
+            </AvatarGroup>
+            </div>
+
         <p>{card.lastWeek} since last week</p>
       </div>
     );
@@ -127,23 +134,13 @@ const WalletPage: Page = (props: any) => {
     return (
       <div
         key={card.label}
-        className="border-1 surface-border border-round m-5 text-center flex flex-column justify-content-center align-items-center"
-        style={{
-          width: "400px",
-          maxWidth: "500px",
-          minWidth: "300px",
-          height: "350px",
-          cursor: "pointer",
-          borderRadius: "25px !important",
-          border: "1px solid silver !important",
-          background: "whitesmoke",
-        }}
+        className={` ${styles.walletCard} m-5 text-center flex flex-column justify-content-center align-items-center`}
       >
         <h3>{card.label}</h3>
         <h6>Intial Wallet Value : {card.intialValue}</h6>
         <h6>Current Wallet Value : {card.currentValue}</h6>
         <h6>Non Sold Assets Value : {card.nonSoldAssetsValue}</h6>
-        <h6>Current Wallet + Non Sold Assets : {card.allAssetsValue}</h6>
+        {/* <h6>Current Wallet + Non Sold Assets : {card.allAssetsValue}</h6> */}
         <h6>Margin : {card.margin} %</h6>
       </div>
     );
