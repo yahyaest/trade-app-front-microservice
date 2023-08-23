@@ -184,6 +184,8 @@ const WalletPage: Page = (props: any) => {
         <h1>Wallet Page</h1>
         <Toast ref={toast} />
         <BreadCrumb model={items as any} home={home} className="mb-3" />
+
+        {/* Dashboard Links */}
         <div className="flex align-items-center justify-content-end">
           <Button
             label="Transactions"
@@ -202,23 +204,47 @@ const WalletPage: Page = (props: any) => {
             onClick={() => router.push(`/wallets/${wallet.name}/assets`)}
           />
         </div>
+
+        {/* Dashboard Cards */}
         <div className="flex align-items-center justify-content-center text-center">
           {walletCard(walletCardInfo)}
           {cardsInfo.map((card) => infoCard(card))}
         </div>
+
+        {/* Dashboard Data */}
         <div className="flex flex-column align-items-center justify-content-center text-center">
-          <div className="card ">
-            <h3> Coin In Stock</h3>
-            <PieChart walletCoinList={walletCoinList} />
+
+          {/* Dashboard Assets + PieCharts */}
+          <div className="flex align-items-center justify-content-center text-center mb-5">
+            {/* Dashboard Assets */}
+            <div className="flex flex-column align-items-center justify-content-center text-center">
+            {bestAssets.length > 0 && <div className="card">
+                <h3> Top Gain Assets</h3>
+                <AssetDataTable assets={bestAssets} HandleSellButton={null} />
+              </div>}
+              {leastAssets.length > 0 && <div className="card">
+                <h3> Top Loss Assets</h3>
+                <AssetDataTable assets={leastAssets} HandleSellButton={null} />
+              </div>}
+            </div>
+            {/* Dashboard PieCharts */}
+            <div className="flex flex-column align-items-center justify-content-center text-center mx-5">
+              <div className="card ">
+                <h3> Coin In Stock</h3>
+                <PieChart pieData={walletCoinList} />
+              </div>
+              <div className="card ">
+                <h3> Balance</h3>
+                <PieChart pieData={[
+                  {name: "Intial Value", value:parseFloat(wallet.intialValue).toFixed(2)},
+                  {name: "Current Value",value:parseFloat(wallet.currentValue).toFixed(2)},
+                  {name: "Non Sold Assets Value ",value:nonSoldAssetsValue.toFixed(2)}
+                  ]} />
+              </div>
+            </div>
           </div>
-          {bestAssets.length > 0 && <div className="card">
-            <h3> Top Gain Assets</h3>
-            <AssetDataTable assets={bestAssets} HandleSellButton={null} />
-          </div>}
-          {leastAssets.length > 0 && <div className="card">
-            <h3> Top Loss Assets</h3>
-            <AssetDataTable assets={leastAssets} HandleSellButton={null} />
-          </div>}
+
+          {/* Dashboard Transactions */}
           {walletTransactions.length > 0 && <div className="card">
             <h3> Lastest Transactions</h3>
             <TransactionDataTable
@@ -233,8 +259,9 @@ const WalletPage: Page = (props: any) => {
               displayHeader={false}
             />
           </div>}
-        </div>
       </div>
+      </div>
+
     </React.Fragment>
   );
 };
@@ -312,7 +339,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       if (asset.boughtAmount - asset.soldAmount > 0) {
         walletCoinList.push({
           name: asset.name,
-          count: asset.boughtAmount - asset.soldAmount,
+          value: asset.boughtAmount - asset.soldAmount,
         });
 
         // Check if coin is updated in the last hour in order to minimize coinranking api usage

@@ -4,7 +4,7 @@ import { Chart } from "primereact/chart";
 export default function PieChart(props: any) {
   const [chartData, setChartData] = useState({});
   const [chartOptions, setChartOptions] = useState({});
-  const { walletCoinList } = props;
+  const { pieData } = props;
 
   useEffect(() => {
     let colorList = [
@@ -21,7 +21,7 @@ export default function PieChart(props: any) {
       "indigo",
     ];
 
-    // prevent duplicate color while walletCoinList.length <= colorList.length
+    // prevent duplicate color while pieData.length <= colorList.length
     let reserveColorList: any[] = [];
 
     let colortFontList = [
@@ -38,11 +38,11 @@ export default function PieChart(props: any) {
 
     const documentStyle = getComputedStyle(document.documentElement);
 
-    for (let e of walletCoinList) {
+    for (let e of pieData) {
       let randomColorIndex = Math.floor(Math.random() * colorList.length);
 
 
-      // prevent duplicate color while walletCoinList.length <= colorList.length
+      // prevent duplicate color while pieData.length <= colorList.length
       while (
         reserveColorList.indexOf(colorList[randomColorIndex]) !== -1 &&
         colorList.length !== reserveColorList.length
@@ -59,7 +59,7 @@ export default function PieChart(props: any) {
         Math.random() * colortFontList.length
       );
       labels.push(e.name);
-      values.push(e.count);
+      values.push(e.value);
       backgroundColor.push(
         documentStyle.getPropertyValue(
           `--${colorList[randomColorIndex]}-${colortFontList[randomColorFontIndex].main}`
