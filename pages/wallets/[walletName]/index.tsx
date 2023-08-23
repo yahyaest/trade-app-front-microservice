@@ -79,21 +79,13 @@ const WalletPage: Page = (props: any) => {
   const home = { icon: "pi pi-home", label: "icons", url: "/" };
 
   const walletCardInfo = {
-    label : "Wallet Balance",
-    currentValue :formatCurrency(wallet.currentValue) ,
-    intialValue : formatCurrency(wallet.intialValue),
-    nonSoldAssetsValue : formatCurrency(nonSoldAssetsValue),
-    allAssetsValue : formatCurrency(+wallet.currentValue + nonSoldAssetsValue),
+    label : "Balance",
+    balance: formatCurrency(+wallet.currentValue + nonSoldAssetsValue) ,
+    intial: formatCurrency(wallet.intialValue),
     margin: margin
   }
 
   const cardsInfo = [
-    // {
-    //   label: "Coins",
-    //   number: walletAssets.length,
-    //   data: walletAssets,
-    //   lastWeek: lastWeekAssetsNumber,
-    // },
     {
       label: "Assets",
       number: walletAssets.length,
@@ -136,14 +128,15 @@ const WalletPage: Page = (props: any) => {
     return (
       <div
         key={card.label}
-        className={` ${styles.walletCard} m-5 text-center flex flex-column justify-content-center align-items-center`}
+        className={` ${styles.infoCard} m-5 text-center flex flex-column justify-content-center align-items-center`}
       >
-        <h3>{card.label}</h3>
-        <h6>Intial Wallet Value : {card.intialValue}</h6>
-        <h6>Current Wallet Value : {card.currentValue}</h6>
-        <h6>Non Sold Assets Value : {card.nonSoldAssetsValue}</h6>
-        {/* <h6>Current Wallet + Non Sold Assets : {card.allAssetsValue}</h6> */}
-        <h6>Margin : {card.margin} %</h6>
+        <h2>{card.label}</h2>
+        <h1>{card.balance}</h1>
+        <p>(Intial {card.intial})</p>
+        <div className="flex justify-content-center align-items-center">
+        <i className={`pi ${card.margin > 0 ? "pi-arrow-up" :"pi-arrow-down"} mx-2`} style={{ color: card.margin > 0 ? 'green' : 'red', fontSize: '2rem' }}></i>
+        <h3 style={{ color: card.margin > 0 ? 'green' : 'red' }}> {card.margin > 0 ? '+' : '-'} {Math.abs(card.margin)} %</h3>
+        </div>
       </div>
     );
   };
