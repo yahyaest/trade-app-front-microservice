@@ -9,7 +9,7 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 
 export default function AssetDataTable(props: any) {
-  const { HandleSellButton } = props;
+  const { HandleSellButton, options } = props;
   const assets: Asset[] = props.assets;
   const [expandedRows, setExpandedRows] = useState(null);
 
@@ -204,11 +204,11 @@ export default function AssetDataTable(props: any) {
         rowExpansionTemplate={rowExpansionTemplate}
         dataKey="id"
         emptyMessage="No Assets found."
-        header={header}
+        header={options.header ? header : null}
         tableStyle={{ minWidth: "60rem" }}
       >
         <Column expander={allowExpansion} style={{ width: "5rem" }} />
-        <Column field="walletName" header="Wallet Name" sortable />
+        {options.colWalletName && <Column field="walletName" header="Wallet Name" sortable />}
         <Column field="name" header="Name" sortable />
         <Column field="symbol" header="Symbol" sortable />
         <Column header="Image" body={imageBodyTemplate} />
@@ -226,7 +226,7 @@ export default function AssetDataTable(props: any) {
           sortable
           body={soldAtBodyTemplate}
         />
-        <Column field="type" header="Type" sortable body={typeBodyTemplate} />
+        {options.colType && <Column field="type" header="Type" sortable body={typeBodyTemplate} />}
         <Column header="Sell" body={sellBodyTemplate}></Column>
       </DataTable>
     </React.Fragment>

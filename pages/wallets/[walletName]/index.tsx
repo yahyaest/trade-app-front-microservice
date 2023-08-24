@@ -38,8 +38,29 @@ const WalletPage: Page = (props: any) => {
   const { lastWeekTransactionsNumber, lastWeekAssetsNumber } = props;
   const [bestAssets, setBestAssets] = useState<Asset[]>([]);
   const [leastAssets, setLeastAssets] = useState<Asset[]>([]);
+  const [windowSize, setWindowSize] = useState<string>('xlg');
   const margin = ((+wallet.currentValue + nonSoldAssetsValue - +wallet.intialValue) / +wallet.intialValue * 100).toFixed(2)
-  const marginUSD = +wallet.intialValue / 100 * Math.abs(margin)
+  const marginUSD = +wallet.intialValue / 100 * Math.abs(+margin)
+
+  // Function to handle screen width change
+const handleScreenChange = () => {
+  if (typeof window !== 'undefined')
+ { const screenWidth = window.innerWidth;
+  if (screenWidth >= 1200) {
+    setWindowSize('xlg')
+  }else if (screenWidth >= 992) {
+    setWindowSize('lg')
+  }else if (screenWidth >= 768) {
+    setWindowSize('md')
+  }else if (screenWidth >= 576) {
+    setWindowSize('sm')
+  }else {
+    setWindowSize('xsm');
+  }}
+}
+
+if (typeof window !== 'undefined')
+{window.addEventListener("resize", handleScreenChange);}
 
   const setBestAndLeastAssetsGain = () => {
     const soldAssets = walletAssets.filter(
@@ -82,7 +103,8 @@ const WalletPage: Page = (props: any) => {
     label : "Balance",
     balance: formatCurrency(+wallet.currentValue + nonSoldAssetsValue) ,
     intial: formatCurrency(wallet.intialValue),
-    margin: margin
+    margin: margin,
+    marginUSD: marginUSD
   }
 
   const cardsInfo = [
@@ -136,6 +158,7 @@ const WalletPage: Page = (props: any) => {
         <div className="flex justify-content-center align-items-center">
         <i className={`pi ${card.margin > 0 ? "pi-arrow-up" :"pi-arrow-down"} mx-2`} style={{ color: card.margin > 0 ? 'green' : 'red', fontSize: '2rem' }}></i>
         <h3 style={{ color: card.margin > 0 ? 'green' : 'red' }}> {card.margin > 0 ? '+' : '-'} {Math.abs(card.margin)} %</h3>
+        <p className="mx-2 mt-2"> ({marginUSD} $)</p>
         </div>
       </div>
     );
@@ -153,6 +176,7 @@ const WalletPage: Page = (props: any) => {
   useEffect(() => {
     if (wallet) setLoading(false);
     setBestAndLeastAssetsGain();
+    handleScreenChange();
   }, []);
 
   if (error) {
@@ -201,50 +225,106 @@ const WalletPage: Page = (props: any) => {
         </div>
 
         {/* Dashboard Cards */}
-        <div className="flex align-items-center justify-content-center text-center">
+        <div className="flex flex-wrap align-items-center justify-content-center text-center">
           {walletCard(walletCardInfo)}
           {cardsInfo.map((card) => infoCard(card))}
         </div>
 
         {/* Dashboard Data */}
-        <div className="flex flex-column align-items-center justify-content-center text-center">
-
+        <div className="flex flex-column justify-content-center text-center">
           {/* Dashboard Assets + PieCharts */}
-          <div className="flex align-items-center justify-content-center text-center mb-5">
-            {/* Dashboard Assets */}
-            <div className="flex flex-column align-items-center justify-content-center text-center">
-            {bestAssets.length > 0 && <div className="card">
-                <h3> Top Gain Assets</h3>
-                <AssetDataTable assets={bestAssets} HandleSellButton={null} />
-              </div>}
-              {leastAssets.length > 0 && <div className="card">
-                <h3> Top Loss Assets</h3>
-                <AssetDataTable assets={leastAssets} HandleSellButton={null} />
-              </div>}
+          {windowSize === "xlg" && <div className="flex align-items-center text-center mb-5">
+              {/* Dashboard Assets */}
+              <div className="flex flex-column align-items-center text-center mx-5">
+              {bestAssets.length > 0 && <div className="card">
+                  <h3> Top Gain Assets</h3>
+                  <AssetDataTable assets={bestAssets} HandleSellButton={null} options={{header : false, colType: false, colWalletName: false}} />
+                </div>}
+                {leastAssets.length > 0 && <div className="card">
+                  <h3> Top Loss Assets</h3>
+                  <AssetDataTable assets={leastAssets} HandleSellButton={null} options={{header : false, colType: false, colWalletName: false}}/>
+                </div>}
+              </div>
+              {/* Dashboard PieCharts */}
+              <div className="flex flex-column align-items-center justify-content-center text-center mx-5">
+                <div className="card ">
+                  <h3> Balance</h3>
+                  <PieChart pieData={[
+                    {name: "Intial Value ($)", value:parseFloat(wallet.intialValue).toFixed(2)},
+                    {name: "Current Value ($)",value:parseFloat(wallet.currentValue).toFixed(2)},
+                    {name: "Non Sold Assets Value ($) ",value:nonSoldAssetsValue.toFixed(2)}
+                    ]} />
+                </div>
+                <div className="card ">
+                  <h3> Coin In Stock</h3>
+                  <PieChart pieData={walletCoinList} />
+                </div>
+              </div>
             </div>
+          }
+
+          {windowSize === "lg" && <div className="flex flex-column justify-content-center text-center mb-5">
             {/* Dashboard PieCharts */}
-            <div className="flex flex-column align-items-center justify-content-center text-center mx-5">
-              <div className="card ">
+            <div className="flex flex align-items-center justify-content-center text-center m-5 ">
+              <div className="card mr-3 mt-5">
                 <h3> Balance</h3>
                 <PieChart pieData={[
                   {name: "Intial Value ($)", value:parseFloat(wallet.intialValue).toFixed(2)},
                   {name: "Current Value ($)",value:parseFloat(wallet.currentValue).toFixed(2)},
                   {name: "Non Sold Assets Value ($) ",value:nonSoldAssetsValue.toFixed(2)}
                   ]} />
-                  <h5 style={{
-                    color: margin > 0 ? "green" : "red"
-                  }}
-                  >{margin > 0 ? "Gain" : "Loss"} : {margin} % ({marginUSD} $)</h5>
               </div>
-              <div className="card ">
+              <div className="card ml-3">
                 <h3> Coin In Stock</h3>
                 <PieChart pieData={walletCoinList} />
               </div>
             </div>
+            {/* Dashboard Assets */}
+            <div className="flex flex-column justify-content-center text-center mx-5">
+            {bestAssets.length > 0 && <div className="card">
+                <h3> Top Gain Assets</h3>
+                <AssetDataTable assets={bestAssets} HandleSellButton={null} options={{header : false, colType: false, colWalletName: false}} />
+              </div>}
+              {leastAssets.length > 0 && <div className="card">
+                <h3> Top Loss Assets</h3>
+                <AssetDataTable assets={leastAssets} HandleSellButton={null} options={{header : false, colType: false, colWalletName: false}}/>
+              </div>}
+            </div>
           </div>
+          }
+
+          {(windowSize === "md" || windowSize === "sm" || windowSize === "xsm") && <div className="flex flex-column justify-content-center text-center mb-5">
+            {/* Dashboard PieCharts */}
+            <div className="flex flex flex-column align-items-center justify-content-center text-center m-5 ">
+              <div className="card">
+                <h3> Balance</h3>
+                <PieChart pieData={[
+                  {name: "Intial Value ($)", value:parseFloat(wallet.intialValue).toFixed(2)},
+                  {name: "Current Value ($)",value:parseFloat(wallet.currentValue).toFixed(2)},
+                  {name: "Non Sold Assets Value ($) ",value:nonSoldAssetsValue.toFixed(2)}
+                  ]} />
+              </div>
+              <div className="card">
+                <h3> Coin In Stock</h3>
+                <PieChart pieData={walletCoinList} />
+              </div>
+            </div>
+            {/* Dashboard Assets */}
+            <div className="flex flex-column justify-content-center text-center mx-5">
+            {bestAssets.length > 0 && <div className="card">
+                <h3> Top Gain Assets</h3>
+                <AssetDataTable assets={bestAssets} HandleSellButton={null} options={{header : false, colType: false, colWalletName: false}} />
+              </div>}
+              {leastAssets.length > 0 && <div className="card">
+                <h3> Top Loss Assets</h3>
+                <AssetDataTable assets={leastAssets} HandleSellButton={null} options={{header : false, colType: false, colWalletName: false}}/>
+              </div>}
+            </div>
+          </div>
+          }
 
           {/* Dashboard Transactions */}
-          {walletTransactions.length > 0 && <div className="card">
+          {walletTransactions.length > 0 && <div className="card mx-5">
             <h3> Lastest Transactions</h3>
             <TransactionDataTable
               transactions={walletTransactions
@@ -259,6 +339,7 @@ const WalletPage: Page = (props: any) => {
             />
           </div>}
       </div>
+
       </div>
 
     </React.Fragment>
