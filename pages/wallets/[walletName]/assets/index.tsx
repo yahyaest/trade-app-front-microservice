@@ -83,7 +83,11 @@ const AssetsPage: Page = (props: any) => {
         <Toast ref={toast} />
         <BreadCrumb model={items as any} home={home} />
         <div className="card">
-          <AssetDataTable assets={assets} HandleSellButton={HandleSellButton} options={{header:true, colType: true, colWalletName: true}} />
+          <AssetDataTable
+            assets={assets}
+            HandleSellButton={HandleSellButton}
+            options={{ header: true, colType: true, colWalletName: true }}
+          />
         </div>
       </div>
     </React.Fragment>

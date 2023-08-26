@@ -206,3 +206,58 @@ export const patchWallet = async (token: string, walletId: number, payload:any) 
   }
 };
 
+export const getWalletHistory = async (token: string, query:any) => {
+  try {
+    let queryParams = "";
+    if (query) {
+      queryParams = "?";
+      for (let key of Object.keys(query)) {
+        queryParams = queryParams + `${key}=${query[key]}&`;
+      }
+      queryParams = queryParams.slice(0, -1);
+    }
+    const walletBaseUrl = process.env.WALLET_BASE_URL;
+    const walletHistoryUrl = `${walletBaseUrl}/api/histories/${queryParams}`;
+
+    if (!token) {
+      throw Error("No token was provided. Failed to get wallet history data");
+    }
+    const options: any = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const response = await axios.get(walletHistoryUrl, options);
+    const walletHistory = response.data;
+    return walletHistory;
+  } catch (error) {
+    console.error("Error fetching wallet history:", error);
+  }
+};
+
+export const addWalletHistory = async (
+  token: string,
+  payload: any
+) => {
+  try {
+    const walletBaseUrl = process.env.WALLET_BASE_URL;
+    const walletHistoryUrl = `${walletBaseUrl}/api/histories`;
+
+    if (!token) {
+      throw Error("No token was provided. Failed to post wallet history");
+    }
+    const options: any = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const walletRersponse = await axios.post(walletHistoryUrl, payload, options);
+    const wallet = walletRersponse.data;
+    return wallet;
+  } catch (error) {
+    console.error("Error posting wallet history:", error);
+  }
+};
+

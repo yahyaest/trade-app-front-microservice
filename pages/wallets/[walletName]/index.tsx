@@ -6,20 +6,22 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { useRouter } from "next/router";
 import { Toast } from "primereact/toast";
 import {
+  addWalletHistory,
   getAssets,
   getAssetsByQuery,
   getCoin,
   getCoinByName,
   getTransactions,
   getWalletByName,
+  getWalletHistory,
 } from "@/services";
 import { Wallet } from "@/models/wallet";
 import { Page } from "../../../types/types";
 import AppConfig from "../../../layout/AppConfig";
 import "primeflex/primeflex.css";
 import { BreadCrumb } from "primereact/breadcrumb";
-import { Avatar } from 'primereact/avatar';
-import { AvatarGroup } from 'primereact/avatargroup';
+import { Avatar } from "primereact/avatar";
+import { AvatarGroup } from "primereact/avatargroup";
 import { Transaction } from "@/models/transaction";
 import { Asset } from "@/models/asset";
 import AssetDataTable from "@/components/assetDataTable";
@@ -28,39 +30,51 @@ import PieChart from "@/components/pieChart";
 import { CryptoCoin } from "@/models/cryptoCoin";
 import { formatCurrency } from "@/utils/utils";
 import styles from "./walletDashboard.module.css";
-
+import { WalletHistory } from "@/models/walletHistory";
 
 const WalletPage: Page = (props: any) => {
-  const { symbols, walletCoinList, nonSoldAssetsValue, error } = props;
+  const {
+    symbols,
+    walletCoinList,
+    nonSoldAssetsValue,
+    walletHistoryData,
+    error,
+  } = props;
   const wallet: Wallet = props.wallet;
   const walletTransactions: Transaction[] = props.walletTransactions;
   const walletAssets: Asset[] = props.walletAssets;
   const { lastWeekTransactionsNumber, lastWeekAssetsNumber } = props;
   const [bestAssets, setBestAssets] = useState<Asset[]>([]);
   const [leastAssets, setLeastAssets] = useState<Asset[]>([]);
-  const [windowSize, setWindowSize] = useState<string>('xlg');
-  const margin = ((+wallet.currentValue + nonSoldAssetsValue - +wallet.intialValue) / +wallet.intialValue * 100).toFixed(2)
-  const marginUSD = +wallet.intialValue / 100 * Math.abs(+margin)
+  const [windowSize, setWindowSize] = useState<string>("xlg");
+  const margin = (
+    ((+wallet.currentValue + nonSoldAssetsValue - +wallet.intialValue) /
+      +wallet.intialValue) *
+    100
+  ).toFixed(2);
+  const marginUSD = (+wallet.intialValue / 100) * Math.abs(+margin);
 
   // Function to handle screen width change
-const handleScreenChange = () => {
-  if (typeof window !== 'undefined')
- { const screenWidth = window.innerWidth;
-  if (screenWidth >= 1200) {
-    setWindowSize('xlg')
-  }else if (screenWidth >= 992) {
-    setWindowSize('lg')
-  }else if (screenWidth >= 768) {
-    setWindowSize('md')
-  }else if (screenWidth >= 576) {
-    setWindowSize('sm')
-  }else {
-    setWindowSize('xsm');
-  }}
-}
+  const handleScreenChange = () => {
+    if (typeof window !== "undefined") {
+      const screenWidth = window.innerWidth;
+      if (screenWidth >= 1200) {
+        setWindowSize("xlg");
+      } else if (screenWidth >= 992) {
+        setWindowSize("lg");
+      } else if (screenWidth >= 768) {
+        setWindowSize("md");
+      } else if (screenWidth >= 576) {
+        setWindowSize("sm");
+      } else {
+        setWindowSize("xsm");
+      }
+    }
+  };
 
-if (typeof window !== 'undefined')
-{window.addEventListener("resize", handleScreenChange);}
+  if (typeof window !== "undefined") {
+    window.addEventListener("resize", handleScreenChange);
+  }
 
   const setBestAndLeastAssetsGain = () => {
     const soldAssets = walletAssets.filter(
@@ -100,12 +114,12 @@ if (typeof window !== 'undefined')
   const home = { icon: "pi pi-home", label: "icons", url: "/" };
 
   const walletCardInfo = {
-    label : "Balance",
-    balance: formatCurrency(+wallet.currentValue + nonSoldAssetsValue) ,
+    label: "Balance",
+    balance: formatCurrency(+wallet.currentValue + nonSoldAssetsValue),
     intial: formatCurrency(wallet.intialValue),
     margin: margin,
-    marginUSD: marginUSD
-  }
+    marginUSD: marginUSD,
+  };
 
   const cardsInfo = [
     {
@@ -131,15 +145,42 @@ if (typeof window !== 'undefined')
         <h3>{card.label}</h3>
         <h4>{card.number}</h4>
         <div className="flex justify-content-center mb-3">
-            <AvatarGroup>
-              {card.data.sort(
-                    (a: Transaction, b: Transaction) =>
-                      ((new Date(b.createdAt) as any) -
-                        new Date(a.createdAt)) as any
-                  ).slice(0,4).map((e : Asset | Transaction) => {if("walletId" in e){ return <Avatar key={e.id} image={`${e.transactions[0].coinImage}`} size="large" shape="circle" />} else return <Avatar key={e.id} image={`${e.coinImage}`} size="large" shape="circle" /> })}
-              <Avatar label={`+${card.data.length - 4}`} shape="circle" size="large" style={{ backgroundColor: '#9c27b0', color: '#ffffff' }} />
-            </AvatarGroup>
-            </div>
+          <AvatarGroup>
+            {card.data
+              .sort(
+                (a: Transaction, b: Transaction) =>
+                  ((new Date(b.createdAt) as any) -
+                    new Date(a.createdAt)) as any
+              )
+              .slice(0, 4)
+              .map((e: Asset | Transaction) => {
+                if ("walletId" in e) {
+                  return (
+                    <Avatar
+                      key={e.id}
+                      image={`${e.transactions[0].coinImage}`}
+                      size="large"
+                      shape="circle"
+                    />
+                  );
+                } else
+                  return (
+                    <Avatar
+                      key={e.id}
+                      image={`${e.coinImage}`}
+                      size="large"
+                      shape="circle"
+                    />
+                  );
+              })}
+            <Avatar
+              label={`+${card.data.length - 4}`}
+              shape="circle"
+              size="large"
+              style={{ backgroundColor: "#9c27b0", color: "#ffffff" }}
+            />
+          </AvatarGroup>
+        </div>
 
         <p>{card.lastWeek} since last week</p>
       </div>
@@ -156,9 +197,20 @@ if (typeof window !== 'undefined')
         <h1>{card.balance}</h1>
         <p>(Intial {card.intial})</p>
         <div className="flex justify-content-center align-items-center">
-        <i className={`pi ${card.margin > 0 ? "pi-arrow-up" :"pi-arrow-down"} mx-2`} style={{ color: card.margin > 0 ? 'green' : 'red', fontSize: '2rem' }}></i>
-        <h3 style={{ color: card.margin > 0 ? 'green' : 'red' }}> {card.margin > 0 ? '+' : '-'} {Math.abs(card.margin)} %</h3>
-        <p className="mx-2 mt-2"> ({marginUSD} $)</p>
+          <i
+            className={`pi ${
+              card.margin > 0 ? "pi-arrow-up" : "pi-arrow-down"
+            } mx-2`}
+            style={{
+              color: card.margin > 0 ? "green" : "red",
+              fontSize: "2rem",
+            }}
+          ></i>
+          <h3 style={{ color: card.margin > 0 ? "green" : "red" }}>
+            {" "}
+            {card.margin > 0 ? "+" : "-"} {Math.abs(card.margin)} %
+          </h3>
+          <p className="mx-2 mt-2"> ({marginUSD} $)</p>
         </div>
       </div>
     );
@@ -233,27 +285,59 @@ if (typeof window !== 'undefined')
         {/* Dashboard Data */}
         <div className="flex flex-column justify-content-center text-center">
           {/* Dashboard Assets + PieCharts */}
-          {windowSize === "xlg" && <div className="flex align-items-center text-center mb-5">
+          {windowSize === "xlg" && (
+            <div className="flex align-items-center text-center mb-5">
               {/* Dashboard Assets */}
               <div className="flex flex-column align-items-center text-center mx-5">
-              {bestAssets.length > 0 && <div className="card">
-                  <h3> Top Gain Assets</h3>
-                  <AssetDataTable assets={bestAssets} HandleSellButton={null} options={{header : false, colType: false, colWalletName: false}} />
-                </div>}
-                {leastAssets.length > 0 && <div className="card">
-                  <h3> Top Loss Assets</h3>
-                  <AssetDataTable assets={leastAssets} HandleSellButton={null} options={{header : false, colType: false, colWalletName: false}}/>
-                </div>}
+                {bestAssets.length > 0 && (
+                  <div className="card">
+                    <h3> Top Gain Assets</h3>
+                    <AssetDataTable
+                      assets={bestAssets}
+                      HandleSellButton={null}
+                      options={{
+                        header: false,
+                        colType: false,
+                        colWalletName: false,
+                      }}
+                    />
+                  </div>
+                )}
+                {leastAssets.length > 0 && (
+                  <div className="card">
+                    <h3> Top Loss Assets</h3>
+                    <AssetDataTable
+                      assets={leastAssets}
+                      HandleSellButton={null}
+                      options={{
+                        header: false,
+                        colType: false,
+                        colWalletName: false,
+                      }}
+                    />
+                  </div>
+                )}
               </div>
               {/* Dashboard PieCharts */}
               <div className="flex flex-column align-items-center justify-content-center text-center mx-5">
                 <div className="card ">
                   <h3> Balance</h3>
-                  <PieChart pieData={[
-                    {name: "Intial Value ($)", value:parseFloat(wallet.intialValue).toFixed(2)},
-                    {name: "Current Value ($)",value:parseFloat(wallet.currentValue).toFixed(2)},
-                    {name: "Non Sold Assets Value ($) ",value:nonSoldAssetsValue.toFixed(2)}
-                    ]} />
+                  <PieChart
+                    pieData={[
+                      {
+                        name: "Intial Value ($)",
+                        value: parseFloat(wallet.intialValue).toFixed(2),
+                      },
+                      {
+                        name: "Current Value ($)",
+                        value: parseFloat(wallet.currentValue).toFixed(2),
+                      },
+                      {
+                        name: "Non Sold Assets Value ($) ",
+                        value: nonSoldAssetsValue.toFixed(2),
+                      },
+                    ]}
+                  />
                 </div>
                 <div className="card ">
                   <h3> Coin In Stock</h3>
@@ -261,87 +345,153 @@ if (typeof window !== 'undefined')
                 </div>
               </div>
             </div>
-          }
+          )}
 
-          {windowSize === "lg" && <div className="flex flex-column justify-content-center text-center mb-5">
-            {/* Dashboard PieCharts */}
-            <div className="flex flex align-items-center justify-content-center text-center m-5 ">
-              <div className="card mr-3 mt-5">
-                <h3> Balance</h3>
-                <PieChart pieData={[
-                  {name: "Intial Value ($)", value:parseFloat(wallet.intialValue).toFixed(2)},
-                  {name: "Current Value ($)",value:parseFloat(wallet.currentValue).toFixed(2)},
-                  {name: "Non Sold Assets Value ($) ",value:nonSoldAssetsValue.toFixed(2)}
-                  ]} />
+          {windowSize === "lg" && (
+            <div className="flex flex-column justify-content-center text-center mb-5">
+              {/* Dashboard PieCharts */}
+              <div className="flex flex align-items-center justify-content-center text-center m-5 ">
+                <div className="card mr-3 mt-5">
+                  <h3> Balance</h3>
+                  <PieChart
+                    pieData={[
+                      {
+                        name: "Intial Value ($)",
+                        value: parseFloat(wallet.intialValue).toFixed(2),
+                      },
+                      {
+                        name: "Current Value ($)",
+                        value: parseFloat(wallet.currentValue).toFixed(2),
+                      },
+                      {
+                        name: "Non Sold Assets Value ($) ",
+                        value: nonSoldAssetsValue.toFixed(2),
+                      },
+                    ]}
+                  />
+                </div>
+                <div className="card ml-3">
+                  <h3> Coin In Stock</h3>
+                  <PieChart pieData={walletCoinList} />
+                </div>
               </div>
-              <div className="card ml-3">
-                <h3> Coin In Stock</h3>
-                <PieChart pieData={walletCoinList} />
+              {/* Dashboard Assets */}
+              <div className="flex flex-column justify-content-center text-center mx-5">
+                {bestAssets.length > 0 && (
+                  <div className="card">
+                    <h3> Top Gain Assets</h3>
+                    <AssetDataTable
+                      assets={bestAssets}
+                      HandleSellButton={null}
+                      options={{
+                        header: false,
+                        colType: false,
+                        colWalletName: false,
+                      }}
+                    />
+                  </div>
+                )}
+                {leastAssets.length > 0 && (
+                  <div className="card">
+                    <h3> Top Loss Assets</h3>
+                    <AssetDataTable
+                      assets={leastAssets}
+                      HandleSellButton={null}
+                      options={{
+                        header: false,
+                        colType: false,
+                        colWalletName: false,
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             </div>
-            {/* Dashboard Assets */}
-            <div className="flex flex-column justify-content-center text-center mx-5">
-            {bestAssets.length > 0 && <div className="card">
-                <h3> Top Gain Assets</h3>
-                <AssetDataTable assets={bestAssets} HandleSellButton={null} options={{header : false, colType: false, colWalletName: false}} />
-              </div>}
-              {leastAssets.length > 0 && <div className="card">
-                <h3> Top Loss Assets</h3>
-                <AssetDataTable assets={leastAssets} HandleSellButton={null} options={{header : false, colType: false, colWalletName: false}}/>
-              </div>}
-            </div>
-          </div>
-          }
+          )}
 
-          {(windowSize === "md" || windowSize === "sm" || windowSize === "xsm") && <div className="flex flex-column justify-content-center text-center mb-5">
-            {/* Dashboard PieCharts */}
-            <div className="flex flex flex-column align-items-center justify-content-center text-center m-5 ">
-              <div className="card">
-                <h3> Balance</h3>
-                <PieChart pieData={[
-                  {name: "Intial Value ($)", value:parseFloat(wallet.intialValue).toFixed(2)},
-                  {name: "Current Value ($)",value:parseFloat(wallet.currentValue).toFixed(2)},
-                  {name: "Non Sold Assets Value ($) ",value:nonSoldAssetsValue.toFixed(2)}
-                  ]} />
+          {(windowSize === "md" ||
+            windowSize === "sm" ||
+            windowSize === "xsm") && (
+            <div className="flex flex-column justify-content-center text-center mb-5">
+              {/* Dashboard PieCharts */}
+              <div className="flex flex flex-column align-items-center justify-content-center text-center m-5 ">
+                <div className="card">
+                  <h3> Balance</h3>
+                  <PieChart
+                    pieData={[
+                      {
+                        name: "Intial Value ($)",
+                        value: parseFloat(wallet.intialValue).toFixed(2),
+                      },
+                      {
+                        name: "Current Value ($)",
+                        value: parseFloat(wallet.currentValue).toFixed(2),
+                      },
+                      {
+                        name: "Non Sold Assets Value ($) ",
+                        value: nonSoldAssetsValue.toFixed(2),
+                      },
+                    ]}
+                  />
+                </div>
+                <div className="card">
+                  <h3> Coin In Stock</h3>
+                  <PieChart pieData={walletCoinList} />
+                </div>
               </div>
-              <div className="card">
-                <h3> Coin In Stock</h3>
-                <PieChart pieData={walletCoinList} />
+              {/* Dashboard Assets */}
+              <div className="flex flex-column justify-content-center text-center mx-5">
+                {bestAssets.length > 0 && (
+                  <div className="card">
+                    <h3> Top Gain Assets</h3>
+                    <AssetDataTable
+                      assets={bestAssets}
+                      HandleSellButton={null}
+                      options={{
+                        header: false,
+                        colType: false,
+                        colWalletName: false,
+                      }}
+                    />
+                  </div>
+                )}
+                {leastAssets.length > 0 && (
+                  <div className="card">
+                    <h3> Top Loss Assets</h3>
+                    <AssetDataTable
+                      assets={leastAssets}
+                      HandleSellButton={null}
+                      options={{
+                        header: false,
+                        colType: false,
+                        colWalletName: false,
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             </div>
-            {/* Dashboard Assets */}
-            <div className="flex flex-column justify-content-center text-center mx-5">
-            {bestAssets.length > 0 && <div className="card">
-                <h3> Top Gain Assets</h3>
-                <AssetDataTable assets={bestAssets} HandleSellButton={null} options={{header : false, colType: false, colWalletName: false}} />
-              </div>}
-              {leastAssets.length > 0 && <div className="card">
-                <h3> Top Loss Assets</h3>
-                <AssetDataTable assets={leastAssets} HandleSellButton={null} options={{header : false, colType: false, colWalletName: false}}/>
-              </div>}
-            </div>
-          </div>
-          }
+          )}
 
           {/* Dashboard Transactions */}
-          {walletTransactions.length > 0 && <div className="card mx-5">
-            <h3> Lastest Transactions</h3>
-            <TransactionDataTable
-              transactions={walletTransactions
-                .sort(
-                  (a: Transaction, b: Transaction) =>
-                    ((new Date(b.createdAt) as any) -
-                      new Date(a.createdAt)) as any
-                )
-                .slice(0, 5)}
-              symbols={symbols}
-              displayHeader={false}
-            />
-          </div>}
+          {walletTransactions.length > 0 && (
+            <div className="card mx-5">
+              <h3> Lastest Transactions</h3>
+              <TransactionDataTable
+                transactions={walletTransactions
+                  .sort(
+                    (a: Transaction, b: Transaction) =>
+                      ((new Date(b.createdAt) as any) -
+                        new Date(a.createdAt)) as any
+                  )
+                  .slice(0, 5)}
+                symbols={symbols}
+                displayHeader={false}
+              />
+            </div>
+          )}
+        </div>
       </div>
-
-      </div>
-
     </React.Fragment>
   );
 };
@@ -360,6 +510,8 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
 ) => {
   try {
     const token = context.req.cookies["token"];
+    const user = context.req.cookies["user"];
+    const username = JSON.parse(user).email;
 
     if (!token) {
       return {
@@ -414,7 +566,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
     );
 
     let walletCoinList = [];
-    let nonSoldAssetsValue = 0
+    let nonSoldAssetsValue = 0;
     for (let asset of walletAssets!) {
       if (asset.boughtAmount - asset.soldAmount > 0) {
         walletCoinList.push({
@@ -423,20 +575,22 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
         });
 
         // Check if coin is updated in the last hour in order to minimize coinranking api usage
-        const assetCoin : CryptoCoin = await getCoinByName(token, asset.name)
+        const assetCoin: CryptoCoin = await getCoinByName(token, asset.name);
         const currentTime = new Date();
         const coinLastUpdateTime = new Date(assetCoin.updatedAt);
         const timeDifference = currentTime - coinLastUpdateTime;
         const hoursDifference = timeDifference / (1000 * 60 * 60);
 
         if (hoursDifference > 1) {
-          const currentCoin : CryptoCoin = await getCoin(token, assetCoin.id)
-          nonSoldAssetsValue = nonSoldAssetsValue + (asset.boughtAmount - asset.soldAmount) * +currentCoin.price
+          const currentCoin: CryptoCoin = await getCoin(token, assetCoin.id);
+          nonSoldAssetsValue =
+            nonSoldAssetsValue +
+            (asset.boughtAmount - asset.soldAmount) * +currentCoin.price;
+        } else {
+          nonSoldAssetsValue =
+            nonSoldAssetsValue +
+            (asset.boughtAmount - asset.soldAmount) * +assetCoin.price;
         }
-        else{
-          nonSoldAssetsValue = nonSoldAssetsValue + (asset.boughtAmount - asset.soldAmount) * +assetCoin.price
-        }
-
       }
     }
 
@@ -453,6 +607,44 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       lastWeekAssetQuery
     );
 
+    // get wallet history data
+    let walletHistoryData : WalletHistory[] = await getWalletHistory(token, {
+      walletName: wallet.name,
+      username,
+    });
+    walletHistoryData = walletHistoryData.sort(
+      (a: WalletHistory, b: WalletHistory) =>
+        ((new Date(a.createdAt) as any) - new Date(b.createdAt)) as any
+    );
+    // add new wallet history data
+    const currentTime = new Date();
+    const lastAddedHistory = new Date(walletHistoryData[walletHistoryData.length - 1].createdAt);
+    const timeDifference = currentTime - lastAddedHistory;
+    const hoursDifference = timeDifference / (1000 * 60 * 60);
+
+    if (hoursDifference > 3) {
+
+    const margin = (
+      ((+wallet.currentValue + nonSoldAssetsValue - +wallet.intialValue) /
+        +wallet.intialValue) *
+      100
+    ).toFixed(2);
+    const marginAmount = (+wallet.intialValue / 100) * +margin;
+
+    const payload = {
+      username: username,
+      walletName: walletName,
+      walletId: wallet.id,
+      intialValue: +wallet.intialValue,
+      currentValue: +wallet.currentValue,
+      nonSoldAssetsValue: nonSoldAssetsValue,
+      margin: +margin,
+      marginAmount,
+    };
+
+    const newWalletHistory = await addWalletHistory(token, payload);
+  }
+
     return {
       props: {
         wallet,
@@ -463,6 +655,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
         symbols,
         walletCoinList,
         nonSoldAssetsValue,
+        walletHistoryData,
         error: null,
       },
     };
