@@ -31,13 +31,14 @@ import { CryptoCoin } from "@/models/cryptoCoin";
 import { formatCurrency } from "@/utils/utils";
 import styles from "./walletDashboard.module.css";
 import { WalletHistory } from "@/models/walletHistory";
+import WalletHistoryChart from "@/components/walletHistoryChart";
 
 const WalletPage: Page = (props: any) => {
   const {
     symbols,
     walletCoinList,
     nonSoldAssetsValue,
-    walletHistoryData,
+    walletChartData,
     error,
   } = props;
   const wallet: Wallet = props.wallet;
@@ -280,6 +281,11 @@ const WalletPage: Page = (props: any) => {
         <div className="flex flex-wrap align-items-center justify-content-center text-center">
           {walletCard(walletCardInfo)}
           {cardsInfo.map((card) => infoCard(card))}
+        </div>
+
+        {/* Dashboard Chart */}
+        <div className="mx-5">
+          <WalletHistoryChart walletChartData={walletChartData} />
         </div>
 
         {/* Dashboard Data */}
@@ -608,7 +614,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
     );
 
     // get wallet history data
-    let walletHistoryData : WalletHistory[] = await getWalletHistory(token, {
+    let walletHistoryData: WalletHistory[] = await getWalletHistory(token, {
       walletName: wallet.name,
       username,
     });
@@ -618,32 +624,48 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
     );
     // add new wallet history data
     const currentTime = new Date();
-    const lastAddedHistory = new Date(walletHistoryData[walletHistoryData.length - 1].createdAt);
+    const lastAddedHistory = new Date(
+      walletHistoryData[walletHistoryData.length - 1].createdAt
+    );
     const timeDifference = currentTime - lastAddedHistory;
     const hoursDifference = timeDifference / (1000 * 60 * 60);
 
     if (hoursDifference > 3) {
+      const margin = (
+        ((+wallet.currentValue + nonSoldAssetsValue - +wallet.intialValue) /
+          +wallet.intialValue) *
+        100
+      ).toFixed(2);
+      const marginAmount = (+wallet.intialValue / 100) * +margin;
 
-    const margin = (
-      ((+wallet.currentValue + nonSoldAssetsValue - +wallet.intialValue) /
-        +wallet.intialValue) *
-      100
-    ).toFixed(2);
-    const marginAmount = (+wallet.intialValue / 100) * +margin;
+      const payload = {
+        username: username,
+        walletName: walletName,
+        walletId: wallet.id,
+        intialValue: +wallet.intialValue,
+        currentValue: +wallet.currentValue,
+        nonSoldAssetsValue: nonSoldAssetsValue,
+        margin: +margin,
+        marginAmount,
+      };
 
-    const payload = {
-      username: username,
-      walletName: walletName,
-      walletId: wallet.id,
-      intialValue: +wallet.intialValue,
-      currentValue: +wallet.currentValue,
-      nonSoldAssetsValue: nonSoldAssetsValue,
-      margin: +margin,
-      marginAmount,
+      await addWalletHistory(token, payload);
+    }
+
+    // set wallet chart data
+    let timeData = [];
+    let valueData = [];
+    let marginData = [];
+    for (let e of walletHistoryData) {
+      timeData.push(e.createdAt);
+      valueData.push(e.currentValue + e.nonSoldAssetsValue);
+      marginData.push(e.margin);
+    }
+    const walletChartData = {
+      time: timeData,
+      value: valueData,
+      margin: marginData,
     };
-
-    const newWalletHistory = await addWalletHistory(token, payload);
-  }
 
     return {
       props: {
@@ -656,6 +678,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
         walletCoinList,
         nonSoldAssetsValue,
         walletHistoryData,
+        walletChartData,
         error: null,
       },
     };
