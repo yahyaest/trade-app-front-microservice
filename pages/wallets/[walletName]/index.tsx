@@ -502,14 +502,14 @@ const WalletPage: Page = (props: any) => {
   );
 };
 
-WalletPage.getLayout = function getLayout(page) {
-  return (
-    <React.Fragment>
-      {page}
-      <AppConfig simple />
-    </React.Fragment>
-  );
-};
+// WalletPage.getLayout = function getLayout(page) {
+//   return (
+//     <React.Fragment>
+//       {page}
+//       <AppConfig simple />
+//     </React.Fragment>
+//   );
+// };
 
 export const getServerSideProps: GetServerSideProps<{}> = async (
   context: any

@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect } from "react";
 // import { getSession } from "next-auth/client";
 import Cookies from "js-cookie";
-import { getCurrentUser } from "../services/gateway";
+import { getCurrentUser, logout } from "../services/gateway";
 
 
 const UserContext = createContext({
@@ -36,9 +36,15 @@ export function UserContextProvider(props: any) {
     fetchData();
   }, []);
 
+  const logoutHandler = async() => {
+    await logout()
+    setCurrentToken(null)
+    setCurrentUser(null);
+  }
+
   const context = {
     user: currentUser,
-    // session: currentSession,
+    logout: logoutHandler
   };
 
   return (

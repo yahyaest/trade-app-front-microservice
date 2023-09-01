@@ -31,6 +31,7 @@ export const login = async (email: string, password: string) => {
 
 export const logout = () => {
   Cookies.remove("token");
+  Cookies.remove("user");
 };
 
 export const getCurrentUser = async () => {

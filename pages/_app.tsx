@@ -3,6 +3,7 @@ import type { Page } from '../types/types';
 import React from 'react';
 import { LayoutProvider } from '../layout/context/layoutcontext';
 import Layout from '../layout/layout';
+import {UserContextProvider} from '../store/user-context'
 import 'primereact/resources/primereact.css';
 import 'primeflex/primeflex.css';
 import 'primeicons/primeicons.css';
@@ -18,11 +19,13 @@ export default function MyApp({ Component, pageProps }: Props) {
         return <LayoutProvider>{Component.getLayout(<Component {...pageProps} />)}</LayoutProvider>;
     } else {
         return (
+            <UserContextProvider>
             <LayoutProvider>
                 <Layout>
                     <Component {...pageProps} />
                 </Layout>
             </LayoutProvider>
+            </UserContextProvider>
         );
     }
 }
