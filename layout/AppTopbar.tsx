@@ -1,19 +1,19 @@
 /* eslint-disable @next/next/no-img-element */
 
-import Link from "next/link";
-import { classNames } from "primereact/utils";
-import { Menubar } from "primereact/menubar";
-import { MenuItem } from "primereact/menuitem";
 import React, {
   forwardRef,
   useContext,
   useImperativeHandle,
   useRef,
 } from "react";
+import Link from "next/link";
+import { classNames } from "primereact/utils";
+import { Menubar } from "primereact/menubar";
+import { MenuItem } from "primereact/menuitem";
+import { Avatar } from "primereact/avatar";
 import { AppTopbarRef } from "../types/types";
 import { LayoutContext } from "./context/layoutcontext";
 import UserContext from "../store/user-context";
-import { logout } from "@/services";
 
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
   const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } =
@@ -24,17 +24,53 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
   const userCtx = useContext(UserContext);
 
   const items: MenuItem[] = [
-    {
-      label: "Users",
-      icon: "pi pi-fw pi-user",
-      items: [
-        {
-          label: "Logout",
-          icon: "pi pi-fw pi-sign-out",
-          command: () => userCtx.logout(),
+    userCtx.avatar
+      ? {
+          template: (item, options) => {
+            return (
+              <button
+                onClick={(e) => options.onClick(e)}
+                className={classNames(
+                  options.className,
+                  "w-full p-link flex align-items-center p-1"
+                )}
+              >
+                <Avatar
+                  image={userCtx.avatar}
+                  className="mr-2"
+                  shape="circle"
+                />
+                <div className="flex flex-column align">
+                  <span className="font-bold">
+                    {userCtx.user?.username
+                      ? userCtx.user.username
+                      : userCtx.user?.email}
+                  </span>
+                </div>
+              </button>
+            );
+          },
+          items: [
+            {
+              label: "Logout",
+              icon: "pi pi-fw pi-sign-out",
+              command: () => userCtx.logout(),
+            },
+          ],
+        }
+      : {
+          label: userCtx.user?.username
+            ? userCtx.user.username
+            : userCtx.user?.email,
+          icon: "pi pi-fw pi-user",
+          items: [
+            {
+              label: "Logout",
+              icon: "pi pi-fw pi-sign-out",
+              command: () => userCtx.logout(),
+            },
+          ],
         },
-      ],
-    },
   ];
 
   useImperativeHandle(ref, () => ({
@@ -78,12 +114,16 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
       {userCtx?.user && (
         <div
           ref={topbarmenuRef}
-          className={classNames("layout-topbar-menu", {
-            "layout-topbar-menu-mobile-active":
-              layoutState.profileSidebarVisible,
-          })}
+          className={classNames(
+            "layout-topbar-menu",
+            {
+              "layout-topbar-menu-mobile-active":
+                layoutState.profileSidebarVisible,
+            },
+            "flex align-items-center"
+          )}
         >
-          <button type="button" className="p-link layout-topbar-button">
+          <button type="button" className="p-link layout-topbar-button mx-2">
             <i className="pi pi-bell"></i>
             <span>Notification</span>
           </button>
@@ -106,7 +146,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
         >
           <Link href="/auth/login">
             <button type="button" className="p-link layout-topbar-button mx-7">
-            <i className="pi pi-sign-in mx-2"></i>
+              <i className="pi pi-sign-in mx-2"></i>
               Login
             </button>
           </Link>

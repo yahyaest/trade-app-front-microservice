@@ -1,19 +1,22 @@
 import { createContext, useState, useEffect } from "react";
 // import { getSession } from "next-auth/client";
 import Cookies from "js-cookie";
-import { getCurrentUser, logout } from "../services/gateway";
+import { getCurrentUser, getCurrentUserAvatar, logout } from "../services/gateway";
+import { User } from "@/models/user";
 
 
 const UserContext = createContext({
   token: null,
-  user: null,
+  user: null as User | null,
+  avatar: null as string | null | any,
   // session: null,
   login: function (user: { email: string; password: string }) {},
   logout: function () {},
 });
 
 export function UserContextProvider(props: any) {
-  const [currentUser, setCurrentUser] = useState<any>();
+  const [currentUser, setCurrentUser] = useState<User | null>();
+  const [currentAvatar, setCurrentAvatar] = useState<string>();
   const [currentToken, setCurrentToken] = useState<string | null>();
   // const [currentSession, setCurrentSession] = useState();
 
@@ -23,7 +26,9 @@ export function UserContextProvider(props: any) {
         if (token) {
           setCurrentToken(token);
           const user = await getCurrentUser();
+          const avatar = await getCurrentUserAvatar();
           setCurrentUser(user);
+          setCurrentAvatar(avatar)
         }
       // const session = await getSession();
       // if (session) {
@@ -44,6 +49,7 @@ export function UserContextProvider(props: any) {
 
   const context = {
     user: currentUser,
+    avatar: currentAvatar,
     logout: logoutHandler
   };
 

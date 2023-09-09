@@ -8,8 +8,9 @@ import { Password } from "primereact/password";
 import { LayoutContext } from "../../../layout/context/layoutcontext";
 import { InputText } from "primereact/inputtext";
 import { classNames } from "primereact/utils";
+import { FileUpload } from "primereact/fileupload";
 import { Page } from "../../../types/types";
-import { register, getCurrentUser } from "@/services";
+import { register, getCurrentUser, uploadImage } from "@/services";
 import Cookies from "js-cookie";
 import { GetServerSideProps } from "next";
 
@@ -18,6 +19,7 @@ const LoginPage: Page = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
+  const [file, setFile] = useState("");
 
   const { layoutConfig } = useContext(LayoutContext);
 
@@ -39,6 +41,8 @@ const LoginPage: Page = () => {
       } else {
         const user = await getCurrentUser();
         Cookies.set("user", JSON.stringify(user));
+        // upload image
+        await uploadImage(file, user?.email as string);
         router.push("/");
       }
     } catch (error: any) {
@@ -146,14 +150,26 @@ const LoginPage: Page = () => {
                 inputClassName="w-full p-3 md:w-30rem"
               ></Password>
 
+              <label
+                htmlFor="avatar"
+                className="block text-900 font-medium text-xl mb-2"
+              >
+                Avatar
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setFile(e.target.files[0])}
+              />
+
               <div className="flex align-items-center justify-content-between mb-5 gap-5"></div>
               <Button
                 label="Register"
                 className="w-full p-3 text-xl"
                 onClick={() => submit()}
               ></Button>
-              <span className="m-3 ">
-                <p className="font-medium no-underline">
+              <span className="">
+                <p className="font-medium no-underline my-3">
                   You have an account ?
                 </p>
               </span>

@@ -132,8 +132,8 @@ const LoginPage: Page = () => {
                 className="w-full p-3 text-xl"
                 onClick={() => submit()}
               ></Button>
-              <span className="m-3 ">
-                <p className="font-medium no-underline">
+              <span>
+                <p className="font-medium no-underline my-3">
                   Don&apos;t have an account ?
                 </p>
               </span>
