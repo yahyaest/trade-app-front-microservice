@@ -622,15 +622,16 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       (a: WalletHistory, b: WalletHistory) =>
         ((new Date(a.createdAt) as any) - new Date(b.createdAt)) as any
     );
+
     // add new wallet history data
     const currentTime = new Date();
-    const lastAddedHistory = new Date(
+    const lastAddedHistory = walletHistoryData.length > 0 ? new Date(
       walletHistoryData[walletHistoryData.length - 1].createdAt
-    );
+    ) : new Date();
     const timeDifference = currentTime - lastAddedHistory;
     const hoursDifference = timeDifference / (1000 * 60 * 60);
 
-    if (hoursDifference > 3) {
+    if (hoursDifference > 3 || walletHistoryData.length === 0) {
       const margin = (
         ((+wallet.currentValue + nonSoldAssetsValue - +wallet.intialValue) /
           +wallet.intialValue) *
