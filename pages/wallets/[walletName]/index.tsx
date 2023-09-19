@@ -49,11 +49,11 @@ const WalletPage: Page = (props: any) => {
   const [leastAssets, setLeastAssets] = useState<Asset[]>([]);
   const [windowSize, setWindowSize] = useState<string>("xlg");
   const margin = (
-    ((+wallet.currentValue + nonSoldAssetsValue - +wallet.intialValue) /
-      +wallet.intialValue) *
+    ((+wallet?.currentValue + nonSoldAssetsValue - +wallet?.intialValue) /
+      +wallet?.intialValue) *
     100
   ).toFixed(2);
-  const marginUSD = (+wallet.intialValue / 100) * Math.abs(+margin);
+  const marginUSD = (+wallet?.intialValue / 100) * Math.abs(+margin);
 
   // Function to handle screen width change
   const handleScreenChange = () => {
@@ -78,7 +78,7 @@ const WalletPage: Page = (props: any) => {
   }
 
   const setBestAndLeastAssetsGain = () => {
-    const soldAssets = walletAssets.filter(
+    const soldAssets = walletAssets?.filter(
       (asset) => asset.boughtAmount === asset.soldAmount
     );
 
@@ -116,8 +116,8 @@ const WalletPage: Page = (props: any) => {
 
   const walletCardInfo = {
     label: "Balance",
-    balance: formatCurrency(+wallet.currentValue + nonSoldAssetsValue),
-    intial: formatCurrency(wallet.intialValue),
+    balance: formatCurrency(+wallet?.currentValue + nonSoldAssetsValue),
+    intial: formatCurrency(wallet?.intialValue),
     margin: margin,
     marginUSD: marginUSD,
   };
@@ -125,13 +125,13 @@ const WalletPage: Page = (props: any) => {
   const cardsInfo = [
     {
       label: "Assets",
-      number: walletAssets.length,
+      number: walletAssets?.length,
       data: walletAssets,
       lastWeek: lastWeekAssetsNumber,
     },
     {
       label: "Transactions",
-      number: walletTransactions.length,
+      number: walletTransactions?.length,
       data: walletTransactions,
       lastWeek: lastWeekTransactionsNumber,
     },
@@ -226,12 +226,6 @@ const WalletPage: Page = (props: any) => {
     });
   };
 
-  useEffect(() => {
-    if (wallet) setLoading(false);
-    setBestAndLeastAssetsGain();
-    handleScreenChange();
-  }, []);
-
   if (error) {
     console.log(error);
     errorToast(error);
@@ -243,12 +237,20 @@ const WalletPage: Page = (props: any) => {
     );
   }
 
-  if (loading)
+  useEffect(() => {
+    if (wallet) setLoading(false);
+    setBestAndLeastAssetsGain();
+    handleScreenChange();
+  }, []);
+
+  if (loading) {
     return (
       <div className="flex justify-content-center align-items-center min-h-screen min-w-screen overflow-hidden">
         <ProgressSpinner />
       </div>
     );
+  }
+
 
   return (
     <React.Fragment>
@@ -625,9 +627,10 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
 
     // add new wallet history data
     const currentTime = new Date();
-    const lastAddedHistory = walletHistoryData.length > 0 ? new Date(
-      walletHistoryData[walletHistoryData.length - 1].createdAt
-    ) : new Date();
+    const lastAddedHistory =
+      walletHistoryData.length > 0
+        ? new Date(walletHistoryData[walletHistoryData.length - 1].createdAt)
+        : new Date();
     const timeDifference = currentTime - lastAddedHistory;
     const hoursDifference = timeDifference / (1000 * 60 * 60);
 
