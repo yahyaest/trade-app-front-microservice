@@ -36,7 +36,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                 )}
               >
                 <Avatar
-                  image={userCtx.avatar}
+                  image={userCtx.avatar ? userCtx.avatar : '/images/default_avatar.webp'}
                   className="mr-2"
                   shape="circle"
                 />
