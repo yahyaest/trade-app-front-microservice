@@ -92,7 +92,6 @@ export const getAssetsByQuery = async (token: string, query:any) => {
   }
 };
 
-
 export const getUserWallets = async (token: string) => {
   try {
     const walletBaseUrl = process.env.WALLET_BASE_URL;
@@ -112,6 +111,7 @@ export const getUserWallets = async (token: string) => {
     return wallets;
   } catch (error) {
     console.error("Error fetching wallets:", error);
+    throw new Error(`Error fetching wallets:", ${error}`)
   }
 };
 
