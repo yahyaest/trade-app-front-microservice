@@ -23,11 +23,14 @@ export const register = async (
 export const login = async (email: string, password: string) => {
   try {
     const gatewayBaseUrl = process.env.GATEWAY_BASE_URL;
-    const signInUrl = `${gatewayBaseUrl}/api/auth/signin`;
-    const login = await axios.post(signInUrl, { email, password });
+    // const signInUrl = `${gatewayBaseUrl}/api/auth/signin`;
+    const signInUrl = "http://localhost:4000/api/auth/signin";
+
+    const login = await axios.post(signInUrl, { email, password }, {withCredentials: true});
     const token = login.data.access_token;
+
     if (!token) return false;
-    Cookies.set("token", token);
+    // Cookies.set("token", token);
     return true;
   } catch (error) {
     console.error("Error login:", error);
@@ -43,17 +46,20 @@ export const getCurrentUser = async () => {
   try {
     const gatewayBaseUrl = process.env.GATEWAY_BASE_URL;
     const currentUserUrl = `${gatewayBaseUrl}/api/users/me`;
-    const token = Cookies.get("token");
-    if (!token) {
-      throw Error("No token was provided. Failed to get current user data");
-    }
-    const options: any = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    const response = await axios.get(currentUserUrl, options);
+    // const token = Cookies.get("token");
+    // if (!token) {
+    //   throw Error("No token was provided. Failed to get current user data");
+    // }
+    // const options: any = {
+    //   headers: {
+    //     Authorization: `Bearer ${token}`,
+    //   },
+    // };
+    // const response = await axios.get(currentUserUrl, options);
+    const response = await axios.get(currentUserUrl, {withCredentials: true});
+
     const user = response.data;
+    console.log("user is : ", user);
     return user as User;
   } catch (error) {
     console.error("Error fetching current user:", error);
