@@ -25,7 +25,9 @@ const CoinsPage: Page = (props: any) => {
 
   const router = useRouter();
 
-  const items = coins ? [{ label: `coins` }] : null;
+  const items = coins
+    ? [{ label: `wallets`, url: "/wallets" }, { label: `coins` }]
+    : null;
   const home = { icon: "pi pi-home", label: "icons", url: "/" };
 
   const errorToast = (error: string) => {
@@ -89,65 +91,61 @@ const CoinsPage: Page = (props: any) => {
     };
   };
 
-  
-
-const coinCard = (coin: CryptoCoin) => {
-  return (
-    <div
-      className={`${styles.card} border-1 surface-border border-round m-5 text-center flex flex-column justify-content-center align-items-center`}
-      style={{
-        position: "relative",
-        overflow: "hidden", // Hide any overflow from the overlay
-      }}
-      key={coin.id}
-      onClick={() => router.push(`/coins/${coin.name}`)}
-    >
-      {/* Overlay with blur effect */}
+  const coinCard = (coin: CryptoCoin) => {
+    return (
       <div
-        className={styles.cardOverlay}
-        style={{ backgroundImage: `url(${coin.iconUrl})`, opacity: 0.8 }} // Set initial opacity to less than 1
-      ></div>
+        className={`${styles.card} border-1 surface-border border-round m-5 text-center flex flex-column justify-content-center align-items-center`}
+        style={{
+          position: "relative",
+          overflow: "hidden", // Hide any overflow from the overlay
+        }}
+        key={coin.id}
+        onClick={() => router.push(`/coins/${coin.name}`)}
+      >
+        {/* Overlay with blur effect */}
+        <div
+          className={styles.cardOverlay}
+          style={{ backgroundImage: `url(${coin.iconUrl})`, opacity: 0.8 }} // Set initial opacity to less than 1
+        ></div>
 
-      {/* Main card content */}
-      <div className={styles.cardContent}>
-        <div className="mb-3 flex flex-row flex-wrap align-items-center justify-content-center">
-          <h5 className="mb-1">
-            {coin.name} ({coin.symbol})
-          </h5>
-          <img
-            className="ml-5"
-            src={`${coin.iconUrl}`}
-            alt={coin.name}
-            width={32}
-            style={{ verticalAlign: "middle" }}
-          />
-        </div>
-        <h6 className="mt-0 mb-3">
-          <strong>Price</strong> : ${(+coin.price).toFixed(3)}
-        </h6>
-        <div className="mt-0 mb-3 text-center flex flex-row flex-wrap align-items-center justify-content-center">
-          <h6 className="mr-4 mt-3 flex align-items-center justify-content-center">
-            <strong>Last update </strong>
-            <p> : {coin.updatedAt.replace("T", " ").split(".")[0]}</p>
+        {/* Main card content */}
+        <div className="">
+          <div className="mb-3 flex flex-row flex-wrap align-items-center justify-content-center">
+            <h5 className="mb-1">
+              {coin.name} ({coin.symbol})
+            </h5>
+            <img
+              className="ml-5"
+              src={`${coin.iconUrl}`}
+              alt={coin.name}
+              width={32}
+              style={{ verticalAlign: "middle" }}
+            />
+          </div>
+          <h6 className="mt-0 mb-3">
+            <strong>Price</strong> : ${(+coin.price).toFixed(3)}
           </h6>
-          <Button
-            style={{ width: "30px", height: "30px" }}
-            icon="pi pi-sync"
-            severity="info"
-            rounded
-            onClick={() => {
-              updateCoin(coin.id);
-              updateCoinToast(coin.name);
-            }}
-          />
+          <div className="mt-0 mb-3 text-center flex flex-row flex-wrap align-items-center justify-content-center">
+            <h6 className="mr-4 mt-3 flex align-items-center justify-content-center">
+              <strong>Last update </strong>
+              <p> : {coin.updatedAt.replace("T", " ").split(".")[0]}</p>
+            </h6>
+            <Button
+              style={{ width: "30px", height: "30px" }}
+              icon="pi pi-sync"
+              severity="info"
+              rounded
+              onClick={() => {
+                updateCoin(coin.id);
+                updateCoinToast(coin.name);
+              }}
+            />
+          </div>
+          <Tag value={`Rank #${coin.rank}`} severity="success"></Tag>
         </div>
-        <Tag value={`Rank #${coin.rank}`} severity="success"></Tag>
       </div>
-    </div>
-  );
-};
-
-
+    );
+  };
 
   useEffect(() => {
     if (coinsList) setLoading(false);
@@ -173,9 +171,9 @@ const coinCard = (coin: CryptoCoin) => {
 
   return (
     <div className="surface-ground align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden text-center">
-      <h1>Coins Page</h1>
+      <BreadCrumb model={items as any} home={home} className="my-3" />
+      <h1 className="font-bold text-3xl sm:text-6xl text-yellow-500">Top 100 Crypto Coins</h1>
       <Toast ref={toast} />
-      <BreadCrumb model={items as any} home={home} className="mb-3" />
       <div className="flex flex-row flex-wrap align-items-center justify-content-center mx-3">
         {coinsList
           .sort((a: CryptoCoin, b: CryptoCoin) => a.rank - b.rank)
@@ -185,14 +183,14 @@ const coinCard = (coin: CryptoCoin) => {
   );
 };
 
-CoinsPage.getLayout = function getLayout(page) {
-  return (
-    <React.Fragment>
-      {page}
-      <AppConfig simple />
-    </React.Fragment>
-  );
-};
+// CoinsPage.getLayout = function getLayout(page) {
+//   return (
+//     <React.Fragment>
+//       {page}
+//       <AppConfig simple />
+//     </React.Fragment>
+//   );
+// };
 
 export const getServerSideProps: GetServerSideProps<{}> = async (
   context: any

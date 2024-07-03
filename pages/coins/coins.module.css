@@ -26,7 +26,7 @@
   z-index: -1; /* Position the overlay behind the card content */
   pointer-events: none; /* Allow click events to pass through the overlay to the card content */
   transition: transform 0.5s, opacity 0.5s; /* Add transition for smooth hover effect */
-  opacity: 0.5 !important; /* Set the desired opacity for the overlay */
+  opacity: 0.75 !important; /* Set the desired opacity for the overlay */
 }
 
 .card:hover .cardOverlay {
@@ -40,11 +40,13 @@
 }
 
 .card h5 {
+  color: black;
   text-shadow: -1px 1px 0 #dcdcdc, 1px 1px 0 #dcdcdc, 1px -1px 0 #dcdcdc,
     -1px -1px 0 #dcdcdc;
 }
 
 .card h6 {
+  color: black;
   text-shadow: -1px 1px 0 #dcdcdc, 1px 1px 0 #dcdcdc, 1px -1px 0 #dcdcdc,
     -1px -1px 0 #dcdcdc;
 }
