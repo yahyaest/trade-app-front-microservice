@@ -10,11 +10,13 @@ import AppConfig from "../layout/AppConfig";
 import { LayoutContext } from "../layout/context/layoutcontext";
 import { NodeRef, Page } from "../types/types";
 import { classNames } from "primereact/utils";
+import { useRouter } from "next/router";
 
 const Home: Page = () => {
   const [isHidden, setIsHidden] = useState(false);
   const { layoutConfig } = useContext(LayoutContext);
   const menuRef = useRef<HTMLElement | null>(null);
+  const router = useRouter();
 
   const toggleMenuItemClick = () => {
     setIsHidden((prevState) => !prevState);
@@ -23,7 +25,7 @@ const Home: Page = () => {
   return (
     <div className="surface-0 flex justify-content-center">
       <div id="home" className="landing-wrapper overflow-hidden">
-        <div className="py-4 px-4 mx-0 md:mx-6 lg:mx-8 lg:px-8 flex align-items-center justify-content-between relative lg:static">
+        {/* <div className="py-4 px-4 mx-0 md:mx-6 lg:mx-8 lg:px-8 flex align-items-center justify-content-between relative lg:static">
           <Link href="/" className="flex align-items-center">
             <img
               src={`/layout/images/${
@@ -114,7 +116,7 @@ const Home: Page = () => {
               ></Button>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div
           id="hero"
@@ -126,7 +128,7 @@ const Home: Page = () => {
           }}
         >
           <div className="mx-4 md:mx-8 mt-0 md:mt-4">
-            <h1 className="text-6xl font-bold text-gray-900 line-height-2">
+            <h1 className="text-6xl font-bold text-yellow-400 line-height-2">
               <span className="font-light block"></span>All In One Trade
               Simulator
             </h1>
@@ -147,6 +149,9 @@ const Home: Page = () => {
               label="Get Started"
               rounded
               className="text-xl border-none mt-3 bg-blue-500 font-normal line-height-3 px-3 text-white"
+              onClick={() => {
+                router.push("/wallets");
+              }}
             ></Button>
           </div>
           <div className="flex justify-content-center md:justify-content-end">
@@ -161,7 +166,9 @@ const Home: Page = () => {
         <div id="features" className="py-4 px-4 lg:px-8 mt-5 mx-0 lg:mx-8">
           <div className="grid justify-content-center">
             <div className="col-12 text-center mt-8 mb-4">
-              <h2 className="text-900 font-normal mb-2">Why choose our solution</h2>
+              <h2 className="text-900 text-green-600 font-bold mb-2">
+                Why choose our solution
+              </h2>
             </div>
 
             <div className="col-12 md:col-12 lg:col-4 p-0 lg:pr-5 lg:pb-5 mt-4 lg:mt-0 text-center">
@@ -189,9 +196,13 @@ const Home: Page = () => {
                       alt="start_instantly.png"
                     />
                   </div>
-                  <h5 className="mb-2 text-900 font-bold">Start Instantly</h5>
+                  <h5 className="mb-2 text-900 font-bold text-red-500">
+                    Start Instantly
+                  </h5>
                   <span className="text-700 text-lg">
-                  Begin your trading journey without delay. Our intuitive platform allows you to start trading in seconds, eliminating the need for complex setup processes.
+                    Begin your trading journey without delay. Our intuitive
+                    platform allows you to start trading in seconds, eliminating
+                    the need for complex setup processes.
                   </span>
                 </div>
               </div>
@@ -222,8 +233,14 @@ const Home: Page = () => {
                       alt="easy_to_use.png"
                     />
                   </div>
-                  <h5 className="mb-2 text-900 font-bold">Easy To Use</h5>
-                  <span className="text-700 text-lg">Experience trading made simple. Our user-friendly interface ensures that traders of all levels, from beginners to experts, can navigate our platform effortlessly.</span>
+                  <h5 className="mb-2 text-900 font-bold text-red-500">
+                    Easy To Use
+                  </h5>
+                  <span className="text-700 text-lg">
+                    Experience trading made simple. Our user-friendly interface
+                    ensures that traders of all levels, from beginners to
+                    experts, can navigate our platform effortlessly.
+                  </span>
                 </div>
               </div>
             </div>
@@ -253,9 +270,13 @@ const Home: Page = () => {
                       alt="secure_and _regulated.png"
                     />
                   </div>
-                  <h5 className="mb-2 text-900 font-bold">Secure and Regulated</h5>
+                  <h5 className="mb-2 text-900 font-bold text-red-500">
+                    Secure and Regulated
+                  </h5>
                   <span className="text-700 text-lg">
-                  Your security is our priority. We implement robust security measures to safeguard your data and investments, giving you peace of mind while you trade.
+                    Your security is our priority. We implement robust security
+                    measures to safeguard your data and investments, giving you
+                    peace of mind while you trade.
                   </span>
                 </div>
               </div>
@@ -265,7 +286,9 @@ const Home: Page = () => {
 
         <div id="highlights" className="py-4 px-4 lg:px-8 mx-0 my-6 lg:mx-8">
           <div className="text-center">
-            <h2 className="text-900 font-normal mb-2">Powerful Everywhere</h2>
+            <h2 className="text-900 text-green-600 font-bold mb-2">
+              Powerful Everywhere
+            </h2>
           </div>
 
           <div className="grid mt-8 pb-2 md:pb-8">
@@ -291,15 +314,20 @@ const Home: Page = () => {
               >
                 <i className="pi pi-fw pi-chart-line text-5xl text-purple-700"></i>
               </div>
-              <h2 className="line-height-1 text-900 text-4xl font-normal">
+              <h2 className="line-height-1 text-900 text-4xl font-bold text-red-500">
                 Real Time Data
               </h2>
               <span
                 className="text-700 text-2xl line-height-3 ml-0 md:ml-2"
                 style={{ maxWidth: "650px" }}
               >
-                Stay ahead of the game with real-time market data at your fingertips. Our platform provides you with up-to-the-second information, empowering you to make informed trading decisions.<br/>
-                No more guessing or relying on outdated information. Access accurate, real-time data to track market movements and seize opportunities as they happen.
+                Stay ahead of the game with real-time market data at your
+                fingertips. Our platform provides you with up-to-the-second
+                information, empowering you to make informed trading decisions.
+                <br />
+                No more guessing or relying on outdated information. Access
+                accurate, real-time data to track market movements and seize
+                opportunities as they happen.
               </span>
             </div>
           </div>
@@ -316,15 +344,20 @@ const Home: Page = () => {
               >
                 <i className="pi pi-fw pi-wallet text-5xl text-yellow-700"></i>
               </div>
-              <h2 className="line-height-1 text-900 text-4xl font-normal">
+              <h2 className="line-height-1 text-900 text-4xl font-bold text-red-500">
                 Manage Your Portfolio
               </h2>
               <span
                 className="text-700 text-2xl line-height-3 mr-0 md:mr-2"
                 style={{ maxWidth: "650px" }}
               >
-                Take control of your investments effortlessly. Our portfolio management tools allow you to track, analyze, and optimize your holdings with ease.<br/>
-Organize and monitor your assets efficiently. Whether you have a diverse portfolio or a focused selection, we provide the tools you need to stay in control.
+                Take control of your investments effortlessly. Our portfolio
+                management tools allow you to track, analyze, and optimize your
+                holdings with ease.
+                <br />
+                Organize and monitor your assets efficiently. Whether you have a
+                diverse portfolio or a focused selection, we provide the tools
+                you need to stay in control.
               </span>
             </div>
 
@@ -363,20 +396,25 @@ Organize and monitor your assets efficiently. Whether you have a diverse portfol
               >
                 <i className="pi pi-fw pi-mobile text-5xl text-blue-700"></i>
               </div>
-              <h2 className="line-height-1 text-900 text-4xl font-normal">
+              <h2 className="line-height-1 text-900 text-4xl font-bold text-red-500">
                 Trade On The Mobile App
               </h2>
               <span
                 className="text-700 text-2xl line-height-3 ml-0 md:ml-2"
                 style={{ maxWidth: "650px" }}
               >
-                Trade anytime, anywhere with our mobile app. Carry the power of trading in your pocket and never miss an opportunity, even when you're on the go.<br/>
-Seamlessly transition between devices. Our mobile app offers the same robust features and security as the desktop version, ensuring a consistent and convenient trading experience.
+                Trade anytime, anywhere with our mobile app. Carry the power of
+                trading in your pocket and never miss an opportunity, even when
+                you&apos;re on the go.
+                <br />
+                Seamlessly transition between devices. Our mobile app offers the
+                same robust features and security as the desktop version,
+                ensuring a consistent and convenient trading experience.
               </span>
               <div className=" flex flex-wrap justify-content-center gap-3 pt-5">
-            <Button type="button" label="Play Store" icon="pi pi-android" />
-            <Button type="button" label="App Store" icon="pi pi-apple" />
-        </div>
+                <Button type="button" label="Play Store" icon="pi pi-android" />
+                <Button type="button" label="App Store" icon="pi pi-apple" />
+              </div>
             </div>
           </div>
         </div>
@@ -487,13 +525,13 @@ Seamlessly transition between devices. Our mobile app offers the same robust fea
   );
 };
 
-Home.getLayout = function getLayout(page) {
-  return (
-    <React.Fragment>
-      {page}
-      <AppConfig simple />
-    </React.Fragment>
-  );
-};
+// Home.getLayout = function getLayout(page) {
+//   return (
+//     <React.Fragment>
+//       {page}
+//       <AppConfig simple />
+//     </React.Fragment>
+//   );
+// };
 
 export default Home;
