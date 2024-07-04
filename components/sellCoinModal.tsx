@@ -159,13 +159,14 @@ export default function SellCoinModal(props: any) {
     <Dialog
       header={`Sell ${data.name}`}
       visible={visible}
-      style={{ width: "50vw" }}
+      style={{ width: "75vw" }}
+      className="px-0 md:px-8"
       onHide={() => setVisible(false)}
       footer={footerContent}
     >
       <div>
         <div className="flex-auto mb-5">
-          <label htmlFor="minmax-buttons" className="font-bold block mb-2">
+          <label htmlFor="minmax-buttons" className="font-bold block mb-4">
             {`Current ${data.name} price`}
           </label>
           {!currentCoin.price && (
@@ -179,7 +180,7 @@ export default function SellCoinModal(props: any) {
           {currentCoin.price && <p>{formatCurrency(currentCoin.price)}</p>}
         </div>
         <div className="flex-auto mb-5">
-          <label htmlFor="minmax-buttons" className="font-bold block mb-2">
+          <label htmlFor="minmax-buttons" className="font-bold block mb-4">
             Bought At these value
           </label>
           {!currentCoin.price && (
@@ -192,7 +193,7 @@ export default function SellCoinModal(props: any) {
           )}
           {currentCoin.price &&
             getCoinBoughtValues().map((e) => (
-              <div key={e.boughtAt}>
+              <div key={e.boughtAt} className="my-2">
                 <strong>{e.amount}</strong>
                 {` ${e.amount > 1 ? "coins" : "coin"} `} bought at
                 <strong> {formatCurrency(e.boughtAt)} </strong>

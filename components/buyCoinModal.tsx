@@ -98,7 +98,8 @@ export default function BuyCoinModal(props: any) {
       <Dialog
         header={`Buy ${coin.name}`}
         visible={visible}
-        style={{ width: "50vw" }}
+        style={{ width: "75vw" }}
+        className="px-0 md:px-8"
         onHide={() => setVisible(false)}
         footer={footerContent}
       >

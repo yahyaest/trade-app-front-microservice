@@ -9,7 +9,8 @@ export default function SpinnerModal(props: any) {
     <Dialog
       header={header}
       visible={visible}
-      style={{ width: "50vw" }}
+      style={{ width: "75vw" }}
+      className="px-0 md:px-8"
       onHide={() => setVisible(false)}
     >
       <div className="flex justify-content-center">

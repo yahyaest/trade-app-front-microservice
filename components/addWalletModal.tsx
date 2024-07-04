@@ -89,6 +89,8 @@ export default function AddWalletModal(props: any) {
           !walletName ||
           !walletType ||
           !walletValue ||
+          walletType === "STOCK" ||
+          walletType === "FOREX" ||
           checkMaxWallets(walletType)
             ? true
             : false
@@ -102,6 +104,7 @@ export default function AddWalletModal(props: any) {
       header={`Add new Wallet for ${username}`}
       visible={visible}
       style={{ width: "50vw" }}
+      className="w-fit sm:w-auto mx-5"
       onHide={() => setVisible(false)}
       footer={footerContent}
     >
@@ -114,6 +117,18 @@ export default function AddWalletModal(props: any) {
             <p className="p-2 text-white">
               <strong>
                 {`You already have the maximum 2 wallets for ${walletType.toLocaleLowerCase()} assets`}
+              </strong>
+            </p>
+          </div>
+        )}
+        {(walletType === "STOCK" || walletType  === "FOREX") && (
+          <div
+          className="mt-2 mb-4 text-center"
+          style={{ backgroundColor: "tomato", borderRadius: "10px" }}
+          >
+            <p className="p-2 text-white">
+              <strong>
+                {`${walletType} wallets are not available yet. Only CRYPTO wallets are available.`}
               </strong>
             </p>
           </div>
