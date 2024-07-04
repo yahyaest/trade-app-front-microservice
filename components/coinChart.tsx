@@ -63,7 +63,7 @@ export default function CoinChart(props: any) {
         const prevElement = document.querySelector(
           `.${selectedDurationClassName}`
         ) as any;
-        prevElement.style.backgroundColor = "white";
+        prevElement.style.backgroundColor = "";; // Remove background color
       }
       setSelectedDurationClassName(className);
     } else {
@@ -71,7 +71,7 @@ export default function CoinChart(props: any) {
         const prevElement = document.querySelector(
           `.${selectedChartTypeClassName}`
         ) as any;
-        prevElement.style.backgroundColor = "white";
+        prevElement.style.backgroundColor = "";; // Remove background color
       }
       setSelectedChartTypeClassName(className);
     }

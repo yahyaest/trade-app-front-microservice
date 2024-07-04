@@ -23,7 +23,7 @@ export default function CoinHeader(props: any) {
           toast={toast}
         />
       )}
-      <div className="flex justify-content-start align-items-center sm:mx-5">
+      <div className="flex justify-content-start align-items-center mx-2 sm:mx-5">
         <img
           src={`${coin.iconUrl}`}
           alt={coin.name}
