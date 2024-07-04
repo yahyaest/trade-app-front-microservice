@@ -16,8 +16,9 @@ export default function CoinChart(props: any) {
   const [chartType, setChartType] = useState<string>("line");
   const [currentVerticalData, setCurrentVerticalData] =
     useState<any[]>(initialVerticalData);
-  const [currentHorizentalData, setCurrentHorizentalData] =
-    useState<any[]>(initialHorizentalData);
+  const [currentHorizentalData, setCurrentHorizentalData] = useState<any[]>(
+    initialHorizentalData
+  );
   const [selectedDurationClassName, setSelectedDurationClassName] =
     useState<string>("");
   const [selectedChartTypeClassName, setSelectedChartTypeClassName] =
@@ -75,7 +76,7 @@ export default function CoinChart(props: any) {
       setSelectedChartTypeClassName(className);
     }
     const element = document.querySelector(`.${className}`) as any;
-    element.style.backgroundColor = "blue";
+    element.style.backgroundColor = "rgba(0, 128, 0, 0.5)"; // Green with 50% opacity
   };
 
   const setChartHorizentalData = (currentvalue: string) => {
@@ -88,7 +89,7 @@ export default function CoinChart(props: any) {
       return currentvalue.split(" ")[3];
     }
     if (duration === "7d") {
-      let time : any = currentvalue.split(" ");
+      let time: any = currentvalue.split(" ");
       time.splice(2, 1);
       time = time.join(" ").toString().replace(",", "");
       return time;
@@ -105,7 +106,7 @@ export default function CoinChart(props: any) {
       return currentvalue.split(" ")[0];
     }
     if (duration === "3y") {
-      let time : any = currentvalue.split(" ");
+      let time: any = currentvalue.split(" ");
       time.splice(1, 1);
       time = time.join(" ").toString().replace(",", "");
       return time;
@@ -194,7 +195,7 @@ export default function CoinChart(props: any) {
             color: textColorSecondary,
             maxTicksLimit: 15,
             callback: function (value: any, index: any) {
-              return setChartHorizentalData(this.getLabelForValue(value))
+              return setChartHorizentalData(this.getLabelForValue(value));
             },
           },
           grid: {
@@ -228,10 +229,14 @@ export default function CoinChart(props: any) {
           header={`Fetching ${coin.name} data`}
         />
       )}
-      <div className="flex justify-content-start  align-items-center  mx-5 mt-3">
-        <Tag value="Price Chart" severity={"warning"} className="mr-6" />
+      <div className="flex justify-content-start  align-items-center mx-2  sm:mx-5 mt-3">
+        <Tag
+          value="Price Chart"
+          severity={"warning"}
+          className="sm:mr-6 w-auto sm:w-full lg:w-auto"
+        />
         <p
-          className="mx-5 m-1"
+          className="mx-2 sm:mx-5 m-1 w-full lg:w-auto"
           style={{ color: `${+chartDiff > 0 ? "green" : "red"} ` }}
         >
           {`${
@@ -240,29 +245,29 @@ export default function CoinChart(props: any) {
               : `- ${chartDiff.replace("-", "")} %`
           } `}
         </p>
-        <p className="mx-5 m-1">
+        <p className="mx-2 sm:mx-5 m-1">
           High : <strong>{chartMax}</strong>
         </p>
-        <p className="mx-5 m-1">
+        <p className="mx-2 sm:mx-5 m-1">
           Low : <strong>{chartMin}</strong>
         </p>
-        <p className="mx-5 m-1">
+        <p className="mx-2 sm:mx-5 m-1">
           Average : <strong>{chartAverage}</strong>
         </p>
       </div>
 
-      <div className="card m-5">
+      <div className="card m-2 sm:m-5">
         <Chart type={chartType} data={chartData} options={chartOptions} />
       </div>
       <div className="flex justify-content-center align-items-center mb-3">
         <div className="border-1 border-blue-500">
-          <div className="my-1 p-1 px-3">Time period </div>
+          <div className="my-1 p-1 sm:px-3">Time period </div>
         </div>
         <div className="flex justify-content-center align-items-center border-1">
           {timeline.map((e) => (
             <div
               key={e}
-              className={` my-1 p-1 px-3 ${styles.test} duration-${e}`}
+              className={` my-1 p-1 px-1 sm:px-3 ${styles.test} duration-${e}`}
               onClick={async () => {
                 setIsDataLoading(true);
                 changeBackgroundColor(`duration-${e}`, "duration");

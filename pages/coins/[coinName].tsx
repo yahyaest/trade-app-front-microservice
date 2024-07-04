@@ -45,7 +45,7 @@ const CoinDetailPage: Page = (props: any) => {
     try {
       const token = Cookies.get("token") as string;
       let wallets: Wallet[] = await getUserWallets(token);
-      wallets = wallets.filter(wallet => wallet.type === "CRYPTO")
+      wallets = wallets.filter((wallet) => wallet.type === "CRYPTO");
       setUserWallets(wallets);
       setIsModal(true);
     } catch (error: any) {
@@ -108,14 +108,14 @@ const CoinDetailPage: Page = (props: any) => {
   );
 };
 
-CoinDetailPage.getLayout = function getLayout(page) {
-  return (
-    <React.Fragment>
-      {page}
-      <AppConfig simple />
-    </React.Fragment>
-  );
-};
+// CoinDetailPage.getLayout = function getLayout(page) {
+//   return (
+//     <React.Fragment>
+//       {page}
+//       <AppConfig simple />
+//     </React.Fragment>
+//   );
+// };
 
 //// Server Side  ////
 

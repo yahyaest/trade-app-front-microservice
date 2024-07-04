@@ -7,7 +7,7 @@ import { CryptoCoin } from "@/models/cryptoCoin";
 import { Wallet } from "@/models/wallet";
 
 export default function CoinHeader(props: any) {
-  const { isModal, setIsModal, HandleBuyButton,toast } = props;
+  const { isModal, setIsModal, HandleBuyButton, toast } = props;
   const coin: CryptoCoin = props.coin;
   const currentCoin: CryptoCoin = props.currentCoin;
   const userWallets: Wallet[] = props.userWallets;
@@ -23,23 +23,29 @@ export default function CoinHeader(props: any) {
           toast={toast}
         />
       )}
-      <div className="flex justify-content-start align-items-center mx-5">
+      <div className="flex justify-content-start align-items-center sm:mx-5">
         <img
           src={`${coin.iconUrl}`}
           alt={coin.name}
           width="50px"
-          className="mr-3"
+          className="mr-2 sm:mr-3"
         />
-        <h3 className="mr-3">{coin.name}</h3>
-        <h6 className="mr-3">{coin.symbol}</h6>
-        <Tag value={`#${coin.rank}`} severity={"danger"} className="mr-3" />
-        <h4>{formatCurrency(currentCoin.price)}</h4>
+        <h3 className="mr-2 sm:mr-3 text-xl sm:text-2xl">{coin.name}</h3>
+        <h6 className="mr-2 sm:mr-3 text-sm sm:text-md">{coin.symbol}</h6>
+        <Tag
+          value={`#${coin.rank}`}
+          severity={"danger"}
+          className="mr-2 sm:mr-33"
+        />
+        <h4 className="text-xl sm:text-2xl">
+          {formatCurrency(currentCoin.price)}
+        </h4>
         <Button
           label="Buy"
           severity="info"
-          size="large"
+          size="small"
           rounded
-          className="ml-auto mr-8"
+          className="ml-5 sm:ml-auto mr-2 md:mr-8"
           onClick={() => HandleBuyButton()}
         />
       </div>

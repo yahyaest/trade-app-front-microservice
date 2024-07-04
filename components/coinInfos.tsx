@@ -4,7 +4,7 @@ import { Button } from "primereact/button";
 import { CryptoCoin } from "@/models/cryptoCoin";
 
 export default function CoinInfos(props: any) {
-  const  coin : CryptoCoin  = props.coin;
+  const coin: CryptoCoin = props.coin;
 
   const valueStatistics = [
     { title: "Price to USD", value: formatCurrency(coin.price), isSpan: true },
@@ -32,7 +32,7 @@ export default function CoinInfos(props: any) {
   const renderValueStatistics = (data: any) => {
     return (
       <React.Fragment key={data.title}>
-        <div className="flex justify-content-between ">
+        <div className="flex justify-content-between">
           <p className="text-lg">{data.title}</p>
           <div>
             <p className="text-lg">
@@ -110,14 +110,18 @@ export default function CoinInfos(props: any) {
 
   return (
     <React.Fragment>
-      <div className="formgrid grid mx-5">
+      <div className="formgrid grid m-5">
         <div className="col mx-5">
-          <h2 className="mb-5">Value Statistics</h2>
+          <h2 className="mb-5 text-2xl md:text-3xl font-bold text-pink-600">
+            Value Statistics
+          </h2>
           {valueStatistics.map((e) => renderValueStatistics(e))}
         </div>
 
-        <div className="col mx-5">
-          <h2>Additional Information</h2>
+        <div className="col mx-5 my-5 sm:my-0">
+          <h2 className="mb-5 text-2xl md:text-3xl font-bold text-pink-600">
+            Additional Information
+          </h2>
           {additionalInformations.map((e) => renderAdditionalInformations(e))}
         </div>
       </div>
