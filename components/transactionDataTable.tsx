@@ -14,7 +14,7 @@ import { Dropdown } from "primereact/dropdown";
 
 export default function TransactionDataTable(props: any) {
   const transactions: Transaction[] = props.transactions;
-  const { symbols, displayHeader  } = props;
+  const { symbols, displayHeader } = props;
   const [loading, setLoading] = useState<boolean>(true);
   const [filters, setFilters] = useState<DataTableFilterMeta>({});
   const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -44,10 +44,11 @@ export default function TransactionDataTable(props: any) {
           type="button"
           icon="pi pi-filter-slash"
           label="Clear"
+          className="w-fit p-1 sm:px-4"
           outlined
           onClick={clearFilter}
         />
-        <span className="p-input-icon-left">
+        <span className="p-input-icon-left w-16rem sm:w-auto px-1">
           <i className="pi pi-search" />
           <InputText
             value={globalFilterValue}

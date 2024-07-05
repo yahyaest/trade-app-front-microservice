@@ -79,9 +79,11 @@ const AssetsPage: Page = (props: any) => {
         />
       )}
       <div className="surface-ground align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden text-center">
-        <h1>Assets Page</h1>
         <Toast ref={toast} />
-        <BreadCrumb model={items as any} home={home} />
+        <BreadCrumb model={items as any} home={home} className="my-3" />
+        <h1 className="font-bold text-3xl sm:text-6xl text-yellow-500">
+          Assets
+        </h1>
         <div className="card">
           <AssetDataTable
             assets={assets}
@@ -94,14 +96,14 @@ const AssetsPage: Page = (props: any) => {
   );
 };
 
-AssetsPage.getLayout = function getLayout(page) {
-  return (
-    <React.Fragment>
-      {page}
-      <AppConfig simple />
-    </React.Fragment>
-  );
-};
+// AssetsPage.getLayout = function getLayout(page) {
+//   return (
+//     <React.Fragment>
+//       {page}
+//       <AppConfig simple />
+//     </React.Fragment>
+//   );
+// };
 
 export const getServerSideProps: GetServerSideProps<{}> = async (
   context: any

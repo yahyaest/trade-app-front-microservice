@@ -32,6 +32,7 @@ import { formatCurrency } from "@/utils/utils";
 import styles from "./walletDashboard.module.css";
 import { WalletHistory } from "@/models/walletHistory";
 import WalletHistoryChart from "@/components/walletHistoryChart";
+import { classNames } from "primereact/utils";
 
 const WalletPage: Page = (props: any) => {
   const {
@@ -194,10 +195,10 @@ const WalletPage: Page = (props: any) => {
         key={card.label}
         className={` ${styles.infoCard} m-5 text-center flex flex-column justify-content-center align-items-center`}
       >
-        <h2>{card.label}</h2>
-        <h1>{card.balance}</h1>
-        <p>(Intial {card.intial})</p>
-        <div className="flex justify-content-center align-items-center">
+        <h3>{card.label}</h3>
+        <h1 className="my-1">{card.balance}</h1>
+        <p className="my-1">(Intial {card.intial})</p>
+        <div className="flex justify-content-center align-items-center my-1">
           <i
             className={`pi ${
               card.margin > 0 ? "pi-arrow-up" : "pi-arrow-down"
@@ -209,9 +210,9 @@ const WalletPage: Page = (props: any) => {
           ></i>
           <h3 style={{ color: card.margin > 0 ? "green" : "red" }}>
             {" "}
-            {card.margin > 0 ? "+" : "-"} {Math.abs(card.margin)} %
+            {card.margin > 0 ? "+" : "-"} {Math.abs(card.margin).toFixed(2)} %
           </h3>
-          <p className="mx-2 mt-2"> ({marginUSD} $)</p>
+          <p className="mx-2 mt-2"> ({marginUSD.toFixed(2)} $)</p>
         </div>
       </div>
     );
@@ -251,13 +252,12 @@ const WalletPage: Page = (props: any) => {
     );
   }
 
-
   return (
     <React.Fragment>
       <div className="surface-ground align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden text-center">
-        <h1>Wallet Page</h1>
         <Toast ref={toast} />
-        <BreadCrumb model={items as any} home={home} className="mb-3" />
+        <BreadCrumb model={items as any} home={home} className="my-3" />
+        <h1 className="font-bold text-3xl sm:text-6xl text-yellow-500">{`${wallet.name} Dashboard`}</h1>
 
         {/* Dashboard Links */}
         <div className="flex align-items-center justify-content-end">
@@ -276,6 +276,14 @@ const WalletPage: Page = (props: any) => {
             rounded
             className="mr-5 mb-5"
             onClick={() => router.push(`/wallets/${wallet.name}/assets`)}
+          />
+          <Button
+            label="Trade"
+            severity="info"
+            size="small"
+            rounded
+            className="mr-5 mb-5"
+            onClick={() => router.push(`/coins`)}
           />
         </div>
 
@@ -299,7 +307,10 @@ const WalletPage: Page = (props: any) => {
               <div className="flex flex-column align-items-center text-center mx-5">
                 {bestAssets.length > 0 && (
                   <div className="card">
-                    <h3> Top Gain Assets</h3>
+                    <h3 className="text-900 text-green-600 font-bold">
+                      {" "}
+                      Top Gain Assets
+                    </h3>
                     <AssetDataTable
                       assets={bestAssets}
                       HandleSellButton={null}
@@ -313,7 +324,10 @@ const WalletPage: Page = (props: any) => {
                 )}
                 {leastAssets.length > 0 && (
                   <div className="card">
-                    <h3> Top Loss Assets</h3>
+                    <h3 className="text-900 text-red-500 font-bold">
+                      {" "}
+                      Top Loss Assets
+                    </h3>
                     <AssetDataTable
                       assets={leastAssets}
                       HandleSellButton={null}
@@ -329,7 +343,7 @@ const WalletPage: Page = (props: any) => {
               {/* Dashboard PieCharts */}
               <div className="flex flex-column align-items-center justify-content-center text-center mx-5">
                 <div className="card ">
-                  <h3> Balance</h3>
+                  <h3 className="text-900 text-blue-600 font-bold"> Balance</h3>
                   <PieChart
                     pieData={[
                       {
@@ -348,7 +362,10 @@ const WalletPage: Page = (props: any) => {
                   />
                 </div>
                 <div className="card ">
-                  <h3> Coin In Stock</h3>
+                  <h3 className="text-900 text-blue-600 font-bold">
+                    {" "}
+                    Coins In Stock
+                  </h3>
                   <PieChart pieData={walletCoinList} />
                 </div>
               </div>
@@ -360,7 +377,7 @@ const WalletPage: Page = (props: any) => {
               {/* Dashboard PieCharts */}
               <div className="flex flex align-items-center justify-content-center text-center m-5 ">
                 <div className="card mr-3 mt-5">
-                  <h3> Balance</h3>
+                  <h3 className="text-900 text-blue-600 font-bold"> Balance</h3>
                   <PieChart
                     pieData={[
                       {
@@ -379,7 +396,10 @@ const WalletPage: Page = (props: any) => {
                   />
                 </div>
                 <div className="card ml-3">
-                  <h3> Coin In Stock</h3>
+                  <h3 className="text-900 text-blue-600 font-bold">
+                    {" "}
+                    Coins In Stock
+                  </h3>
                   <PieChart pieData={walletCoinList} />
                 </div>
               </div>
@@ -387,7 +407,10 @@ const WalletPage: Page = (props: any) => {
               <div className="flex flex-column justify-content-center text-center mx-5">
                 {bestAssets.length > 0 && (
                   <div className="card">
-                    <h3> Top Gain Assets</h3>
+                    <h3 className="text-900 text-green-600 font-bold">
+                      {" "}
+                      Top Gain Assets
+                    </h3>
                     <AssetDataTable
                       assets={bestAssets}
                       HandleSellButton={null}
@@ -401,7 +424,10 @@ const WalletPage: Page = (props: any) => {
                 )}
                 {leastAssets.length > 0 && (
                   <div className="card">
-                    <h3> Top Loss Assets</h3>
+                    <h3 className="text-900 text-red-500 font-bold">
+                      {" "}
+                      Top Loss Assets
+                    </h3>
                     <AssetDataTable
                       assets={leastAssets}
                       HandleSellButton={null}
@@ -424,7 +450,7 @@ const WalletPage: Page = (props: any) => {
               {/* Dashboard PieCharts */}
               <div className="flex flex flex-column align-items-center justify-content-center text-center m-5 ">
                 <div className="card">
-                  <h3> Balance</h3>
+                  <h3 className="text-900 text-blue-600 font-bold"> Balance</h3>
                   <PieChart
                     pieData={[
                       {
@@ -443,7 +469,10 @@ const WalletPage: Page = (props: any) => {
                   />
                 </div>
                 <div className="card">
-                  <h3> Coin In Stock</h3>
+                  <h3 className="text-900 text-blue-600 font-bold">
+                    {" "}
+                    Coins In Stock
+                  </h3>
                   <PieChart pieData={walletCoinList} />
                 </div>
               </div>
@@ -451,7 +480,10 @@ const WalletPage: Page = (props: any) => {
               <div className="flex flex-column justify-content-center text-center mx-5">
                 {bestAssets.length > 0 && (
                   <div className="card">
-                    <h3> Top Gain Assets</h3>
+                    <h3 className="text-900 text-green-600 font-bold">
+                      {" "}
+                      Top Gain Assets
+                    </h3>
                     <AssetDataTable
                       assets={bestAssets}
                       HandleSellButton={null}
@@ -465,7 +497,10 @@ const WalletPage: Page = (props: any) => {
                 )}
                 {leastAssets.length > 0 && (
                   <div className="card">
-                    <h3> Top Loss Assets</h3>
+                    <h3 className="text-900 text-red-500 font-bold">
+                      {" "}
+                      Top Loss Assets
+                    </h3>
                     <AssetDataTable
                       assets={leastAssets}
                       HandleSellButton={null}
@@ -484,7 +519,10 @@ const WalletPage: Page = (props: any) => {
           {/* Dashboard Transactions */}
           {walletTransactions.length > 0 && (
             <div className="card mx-5">
-              <h3> Lastest Transactions</h3>
+              <h3 className="text-900 text-blue-600 font-bold">
+                {" "}
+                Lastest Transactions
+              </h3>
               <TransactionDataTable
                 transactions={walletTransactions
                   .sort(

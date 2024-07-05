@@ -108,7 +108,7 @@ export default function WalletHistoryChart(props: any) {
   }, []);
 
   return (
-    <div className="card m-5">
+    <div className="card sm:m-2 md:m-5">
       <Chart type="line" data={chartData} options={chartOptions} />
     </div>
   );

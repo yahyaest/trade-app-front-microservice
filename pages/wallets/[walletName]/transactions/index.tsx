@@ -49,12 +49,15 @@ const TransactionsPage: Page = (props: any) => {
       <div className="grid">
         <div className="col-12">
           <div className="card">
-            <h5>Transactions Page</h5>
-            <BreadCrumb model={items as any} home={home} className="mb-3" />
+            <BreadCrumb model={items as any} home={home} className="my-3" />
+            <h5 className="font-bold text-3xl sm:text-6xl text-yellow-500">
+              Transactions
+            </h5>
             <TransactionDataTable
               transactions={transactions.sort(
                 (a: Transaction, b: Transaction) =>
-                  new Date(b.createdAt) as any - new Date(a.createdAt) as any
+                  ((new Date(b.createdAt) as any) -
+                    new Date(a.createdAt)) as any
               )}
               symbols={symbols}
               displayHeader={true}
@@ -66,14 +69,14 @@ const TransactionsPage: Page = (props: any) => {
   );
 };
 
-TransactionsPage.getLayout = function getLayout(page) {
-  return (
-    <React.Fragment>
-      {page}
-      <AppConfig simple />
-    </React.Fragment>
-  );
-};
+// TransactionsPage.getLayout = function getLayout(page) {
+//   return (
+//     <React.Fragment>
+//       {page}
+//       <AppConfig simple />
+//     </React.Fragment>
+//   );
+// };
 
 export const getServerSideProps: GetServerSideProps<{}> = async (
   context: any
