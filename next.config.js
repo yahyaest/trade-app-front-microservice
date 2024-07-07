@@ -25,6 +25,7 @@ module.exports = (phase) => {
         GATEWAY_BASE_URL: process.env.GATEWAY_BASE_URL,
         CRYPTO_BASE_URL: process.env.CRYPTO_BASE_URL,
         WALLET_BASE_URL: process.env.WALLET_BASE_URL,
+        NOTIFICATION_BASE_URL : process.env.NOTIFICATION_BASE_URL
       },
     };
   }
@@ -41,9 +42,10 @@ module.exports = (phase) => {
       NEXT_APP_API_URL: "http://localhost:3000/api",
       NEXT_APP_ROOT_URL: "http://localhost:3000",
       NEXTAUTH_URL: "http://localhost:3000",
-      GATEWAY_BASE_URL: "http://gateway:3000",
-      CRYPTO_BASE_URL: "http://crypto:3000",
-      WALLET_BASE_URL: "http://wallet:3000",
+      GATEWAY_BASE_URL: process.env.GATEWAY_BASE_URL,
+      CRYPTO_BASE_URL: process.env.CRYPTO_BASE_URL,
+      WALLET_BASE_URL: process.env.WALLET_BASE_URL,
+      NOTIFICATION_BASE_URL : process.env.NOTIFICATION_BASE_URL
     },
   };
 };
