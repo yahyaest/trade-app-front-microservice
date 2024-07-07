@@ -10,9 +10,10 @@ import { LayoutContext } from "../../../layout/context/layoutcontext";
 import { InputText } from "primereact/inputtext";
 import { classNames } from "primereact/utils";
 import { Page } from "../../../types/types";
-import { login, getCurrentUser } from "@/services";
+import { login, getCurrentUser, getCurrentUserAvatar } from "@/services";
 import Cookies from "js-cookie";
 import { GetServerSideProps } from "next";
+import { User } from "@/models/user";
 
 const LoginPage: Page = () => {
   const [email, setEmail] = useState("");
@@ -33,7 +34,9 @@ const LoginPage: Page = () => {
       if (!isLogin) {
         alert("Wrong Credential");
       } else {
-        const user = await getCurrentUser();
+        const user = await getCurrentUser() as User;
+        const userImage = await getCurrentUserAvatar();
+        user.avatarUrl = userImage;
         Cookies.set("user", JSON.stringify(user));
         router.push("/");
       }

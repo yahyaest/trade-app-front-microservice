@@ -10,9 +10,10 @@ import { InputText } from "primereact/inputtext";
 import { classNames } from "primereact/utils";
 import { FileUpload } from "primereact/fileupload";
 import { Page } from "../../../types/types";
-import { register, getCurrentUser, uploadImage } from "@/services";
+import { register, getCurrentUser, uploadImage, getCurrentUserAvatar } from "@/services";
 import Cookies from "js-cookie";
 import { GetServerSideProps } from "next";
+import { User } from "@/models/user";
 
 const LoginPage: Page = () => {
   const [username, setUsername] = useState("");
@@ -39,10 +40,12 @@ const LoginPage: Page = () => {
       if (!isRegister) {
         alert("Wrong Credential");
       } else {
-        const user = await getCurrentUser();
-        Cookies.set("user", JSON.stringify(user));
+        const user = await getCurrentUser() as User;
         // upload image
         await uploadImage(file, user?.email as string);
+        const userImage = await getCurrentUserAvatar();
+        user.avatarUrl = userImage;
+        Cookies.set("user", JSON.stringify(user));
         router.push("/");
       }
     } catch (error: any) {
