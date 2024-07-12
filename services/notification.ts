@@ -1,11 +1,11 @@
 import axios from "axios";
 import { getToken, getUserByEmail } from "./gateway";
 import Cookies from "js-cookie";
-let cookies : any;
+let cookies: any;
 
-if (typeof window === 'undefined') {
+if (typeof window === "undefined") {
   // This code will only be executed on the server
-  cookies = require('next/headers').cookies;
+  cookies = require("next/headers").cookies;
 } else {
   // This code will only be executed on the client
   cookies = Cookies;
@@ -15,7 +15,9 @@ export const addUserNotification = async (payload: any) => {
   try {
     const notificationBaseUrl = process.env.NOTIFICATION_BASE_URL;
     const notificationUrl = `${notificationBaseUrl}/api/notifications`;
-    const token = Cookies.get("token") ? Cookies.get("token") : cookies().get("token")?.value;
+    const token = Cookies.get("token")
+      ? Cookies.get("token")
+      : cookies().get("token")?.value;
     if (!token) {
       throw Error("No token was provided. Failed to post notification");
     }
@@ -29,7 +31,7 @@ export const addUserNotification = async (payload: any) => {
     if (!payload.externalArgs) {
       payload.externalArgs = JSON.stringify({});
     }
-    
+
     const response = await axios.post(notificationUrl, payload, options);
     const notification = response.data;
 
@@ -93,7 +95,9 @@ export const getUserNotifications = async (email: string) => {
   try {
     const notificationBaseUrl = process.env.NOTIFICATION_BASE_URL;
     const notificationUrl = `${notificationBaseUrl}/api/notifications/?userEmail=${email}`;
-    const token = Cookies.get("token") ? Cookies.get("token") : cookies().get("token")?.value;
+    const token = Cookies.get("token")
+      ? Cookies.get("token")
+      : cookies().get("token")?.value;
     if (!token) {
       throw Error("No token was provided. Failed to post notification");
     }
@@ -105,6 +109,7 @@ export const getUserNotifications = async (email: string) => {
     };
     const response = await axios.get(notificationUrl, options);
     const notification = response.data;
+    console.log("Notifications: ", notification);
 
     return notification;
   } catch (error) {
@@ -119,7 +124,9 @@ export const updateNotification = async (
   try {
     const notificationBaseUrl = process.env.NOTIFICATION_BASE_URL;
     const notificationUrl = `${notificationBaseUrl}/api/notifications/${notificationId}`;
-    const token = Cookies.get("token") ? Cookies.get("token") : cookies().get("token")?.value;
+    const token = Cookies.get("token")
+      ? Cookies.get("token")
+      : cookies().get("token")?.value;
     if (!token) {
       throw Error("No token was provided. Failed to post notification");
     }
@@ -142,7 +149,9 @@ export const updateBulkNotification = async (payload: any) => {
   try {
     const notificationBaseUrl = process.env.NOTIFICATION_BASE_URL;
     const notificationUrl = `${notificationBaseUrl}/api/bulk_notifications`;
-    const token = Cookies.get("token") ? Cookies.get("token") : cookies().get("token")?.value;
+    const token = Cookies.get("token")
+      ? Cookies.get("token")
+      : cookies().get("token")?.value;
     if (!token) {
       throw Error("No token was provided. Failed to post notification");
     }
@@ -165,7 +174,9 @@ export const deleteNotification = async (notificationId: number) => {
   try {
     const notificationBaseUrl = process.env.NOTIFICATION_BASE_URL;
     const notificationUrl = `${notificationBaseUrl}/api/notifications/${notificationId}`;
-    const token = Cookies.get("token") ? Cookies.get("token") : cookies().get("token")?.value;
+    const token = Cookies.get("token")
+      ? Cookies.get("token")
+      : cookies().get("token")?.value;
     if (!token) {
       throw Error("No token was provided. Failed to post notification");
     }
