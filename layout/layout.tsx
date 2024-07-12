@@ -12,6 +12,7 @@ import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
 import PrimeReact from 'primereact/api';
 import { ChildContainerProps, LayoutState, AppTopbarRef } from '../types/types';
+import AppNavbar from './AppNavbar';
 
 const Layout = ({ children }: ChildContainerProps) => {
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
@@ -135,17 +136,19 @@ const Layout = ({ children }: ChildContainerProps) => {
                 <link rel="icon" href={`/favicon.ico`} type="image/x-icon"></link>
             </Head>
 
-            <div className={containerClass}>
-                <AppTopbar ref={topbarRef} />
-                <div ref={sidebarRef} className="layout-sidebar">
+            {/* <div className={containerClass}> */}
+            <div>
+                <AppNavbar/>
+                {/* <AppTopbar ref={topbarRef} /> */}
+                {/* <div ref={sidebarRef} className="layout-sidebar">
                     <AppSidebar />
-                </div>
+                </div> */}
                 <div className="layout-main-container">
                     <div className="layout-main">{children}</div>
                     <AppFooter />
                 </div>
                 <AppConfig />
-                <div className="layout-mask"></div>
+                {/* <div className="layout-mask"></div> */}
             </div>
         </React.Fragment>
     );

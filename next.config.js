@@ -16,6 +16,7 @@ module.exports = (phase) => {
       images: {
         domains: [
           // "media.kitsu.io",
+          "172.26.0.4" // need to be fixed (eg: domain name in production , find alternative for development : fix docker network ip address ?)
         ],
       },
       env: {
