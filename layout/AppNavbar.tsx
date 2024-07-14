@@ -58,6 +58,12 @@ export default function AppNavbar() {
         },
       ],
     },
+    {
+      label: "Tasks",
+      link: "/tasks",
+      icon: "pi pi-clock",
+      template: itemRenderer,
+    },
   ];
 
   const start = (

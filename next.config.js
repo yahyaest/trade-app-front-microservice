@@ -26,7 +26,8 @@ module.exports = (phase) => {
         GATEWAY_BASE_URL: process.env.GATEWAY_BASE_URL,
         CRYPTO_BASE_URL: process.env.CRYPTO_BASE_URL,
         WALLET_BASE_URL: process.env.WALLET_BASE_URL,
-        NOTIFICATION_BASE_URL : process.env.NOTIFICATION_BASE_URL
+        NOTIFICATION_BASE_URL: process.env.NOTIFICATION_BASE_URL,
+        TASK_SCHEDULER_BASE: process.env.TASK_SCHEDULER_BASE
       },
     };
   }
@@ -46,7 +47,8 @@ module.exports = (phase) => {
       GATEWAY_BASE_URL: process.env.GATEWAY_BASE_URL,
       CRYPTO_BASE_URL: process.env.CRYPTO_BASE_URL,
       WALLET_BASE_URL: process.env.WALLET_BASE_URL,
-      NOTIFICATION_BASE_URL : process.env.NOTIFICATION_BASE_URL
+      NOTIFICATION_BASE_URL: process.env.NOTIFICATION_BASE_URL,
+      TASK_SCHEDULER_BASE: process.env.TASK_SCHEDULER_BASE
     },
   };
 };
