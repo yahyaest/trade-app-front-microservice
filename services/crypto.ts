@@ -180,3 +180,26 @@ export const getCoinChartData = async (
     );
   }
 };
+
+export const getCoinsList = async (token: string) => {
+  try {
+    const cryptoBaseUrl = process.env.CRYPTO_BASE_URL;
+    const coinsUrl = `${cryptoBaseUrl}/api/coins/list`;
+
+    if (!token) {
+      throw Error("No token was provided. Failed to get coin data");
+    }
+    const options: any = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const response = await axios.get(coinsUrl, options);
+    const coinsList = response.data;
+
+    return coinsList;
+  } catch (error: any) {
+    console.error("Error fetching coins List:", error.response.data.message);
+    throw Error(`Error fetching coins List data: ${error.response.data.message}`);
+  }
+};
