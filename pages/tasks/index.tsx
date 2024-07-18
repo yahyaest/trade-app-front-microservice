@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { GetServerSideProps } from "next";
 import { Page } from "../../types/types";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
-import { getCoin, getCoinByName, getCoinsList } from "@/services/crypto";
+import TaskArgs from "@/components/taskArgs";
+import { Task } from "@/models/task";
+import { User } from "@/models/user";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Toast } from "primereact/toast";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -14,8 +15,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { InputNumber } from "primereact/inputnumber";
 import { Dropdown } from "primereact/dropdown";
 import { Checkbox } from "primereact/checkbox";
-import { CryptoCoin } from "@/models/cryptoCoin";
-import { Avatar } from "primereact/avatar";
+import { addTask } from "@/services/task";
 
 const TasksPage: Page = (props: any) => {
   const { error } = props;
@@ -29,18 +29,16 @@ const TasksPage: Page = (props: any) => {
   const [retryNumber, setRetryNumber] = useState<number>(0);
   // Task Args States
   const [taskArgs, setTaskArgs] = useState<Object>({});
-  const [isTaskPriceAlert, setIsTaskPriceAlert] = useState<boolean>(false);
-  const [coinsList, setCoinsList] = useState<string[]>([]);
-  const [selectedCoin, setSelectedCoin] = useState<string>("");
-  const [currentCoinValue, setCurrentCoinValue] = useState<string>("");
 
   const toast: any = useRef(null);
-
   const router = useRouter();
 
   const items = [{ label: `tasks` }];
   const home = { icon: "pi pi-home", label: "icons", url: "/" };
   const token = Cookies.get("token") as string;
+  const user = Cookies.get("user")
+    ? (JSON.parse(Cookies.get("user") as string) as User)
+    : null;
 
   const tasksList = [
     { name: "Wallet History" }, // TODO: to be removed and created by admin for each user
@@ -58,52 +56,22 @@ const TasksPage: Page = (props: any) => {
   };
 
   const onTaskTypeChange = async (e: any) => {
-    if (e.value.name === "Price Alert") {
-      const coinsList = await getCoinsList(token);
-      setCoinsList(coinsList);
-      setIsTaskPriceAlert(true);
-    } else {
-      setIsTaskPriceAlert(false);
-    }
-
     setTaskType(e.value);
     setTaskArgs({});
   };
 
-  // Task Args Templates
-  const onCoinChange = async (e: any) => {
-    const coin: CryptoCoin = await getCoinByName(token, e.value.name);
-    const currentCoin: CryptoCoin = await getCoin(token, coin.id);
-    setSelectedCoin(e.value);
-    setCurrentCoinValue((+currentCoin.price).toFixed(2));
-    setTaskArgs({ ...taskArgs, coin: e.value });
-  };
-  const selectedCoinTemplate = (option: any, props: any) => {
-    if (option) {
-      return (
-        <div className="flex align-items-center">
-          <Avatar image={option.icon} shape="circle" />
-          <div className="mx-2">{option.name}</div>
-          <div className="mx-2">{currentCoinValue} $</div>
-        </div>
-      );
-    }
-
-    return <span>{props.placeholder}</span>;
-  };
-
-  const coinOptionTemplate = (option: any) => {
-    return (
-      <div className="flex align-items-center">
-        <Avatar image={option.icon} shape="circle" />
-        <div className="mx-2">{option.name}</div>
-      </div>
-    );
-  };
-
   const submitTask = async () => {
     try {
-      console.log("submitTask");
+      const payload: Task = {
+        name: taskName,
+        description: taskDescription,
+        task_type: (taskType as { name: string }).name,
+        cron_expression: cronExpression ? cronExpression : null,
+        user: user?.email as string,
+        args: taskArgs,
+        retry_number: retryNumber ? retryNumber : 0,
+      };
+      await addTask(token, payload);
     } catch (error: any) {
       console.log(error.message);
     }
@@ -242,29 +210,11 @@ const TasksPage: Page = (props: any) => {
           </div>
           {/* Task Args */}
           {taskType && (
-            <div className="my-5">
-              <h4>
-                {" "}
-                Task <strong>{(taskType as { name: string }).name}</strong> Args
-              </h4>
-              {isTaskPriceAlert && (
-                <div className="my-5">
-                  <label htmlFor="coin" className="font-bold block mb-2">
-                    Coin <span className="text-xs">(with current price)</span>
-                  </label>
-                  <Dropdown
-                    value={selectedCoin}
-                    onChange={(e) => onCoinChange(e)}
-                    options={coinsList}
-                    optionLabel="name"
-                    placeholder="Select a Coin"
-                    className="w-full md:w-20rem"
-                    valueTemplate={selectedCoinTemplate}
-                    itemTemplate={coinOptionTemplate}
-                  />
-                </div>
-              )}
-            </div>
+            <TaskArgs
+              taskType={taskType}
+              taskArgs={taskArgs}
+              setTaskArgs={setTaskArgs}
+            />
           )}
 
           {/* End Task Args */}
