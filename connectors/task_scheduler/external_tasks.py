@@ -2,6 +2,7 @@ import time
 import random
 import glob
 import os
+import json
 from django_celery_results.models import TaskResult
 from django_celery_beat.models import PeriodicTask
 from task_scheduler_app.tools.helpers import logger
@@ -83,6 +84,9 @@ def price_alert(self, *args, **kwargs):
         
         coin = kwargs.get("coin", None)
         coin_id = coin.get("id", None)
+        coin_name = coin.get("name", None)
+        price_direction = kwargs.get("priceDirection", None)
+        price_alert = kwargs.get("alertPrice", None)
         
         task_scheduler_credentials = {
             "email" : os.environ.get("TASK_SCHEDULER_USERNAME"), 
@@ -96,13 +100,38 @@ def price_alert(self, *args, **kwargs):
         if not token:
             raise ValueError("No token was provided. Failed executing price alert task")
         
-        logger.info(f"YMA ===> Token: {token}")
-        
+        # Get latest coin info
+        logger.info(f"Getting coin with name {coin_name}")
         crypto = Crypto()
         crypto.token = token
         coin = crypto.get_coin(coin_id=coin_id)
+        current_coin_price = coin.get("price", None)
         
-        logger.info(f"YMA ===> Coin: {coin}")
+        if price_direction == "over" and float(current_coin_price) <= float(price_alert):
+            logger.info(f"Coin {coin_name} current price {current_coin_price} $ is still under price alert {price_alert} $")
+            return
+        
+        if price_direction == "under" and float(current_coin_price) >= float(price_alert):
+            logger.info(f"Coin {coin_name} current price {current_coin_price} $ is still over {price_alert} $")
+            return
+        
+        # Send notification
+        logger.info(f"Sending price alert notification for coin {coin_name}")
+        user = kwargs.get("user", None)
+        notification = Notification()
+        notification.token = token
+        notification_payload = {
+            "message": f"The coin {coin_name} with price alert {'over' if price_direction == 'over' else 'under'} {price_alert} $ has reached the price of {current_coin_price} $",
+            "sender": user.get('email', None),
+            "title": f"Price Alert for coin {coin_name}",
+            "userId": user.get('id', None),
+            "username": user.get('username', None),
+            "userEmail": user.get('email', None),
+            "userImage": user.get('avatarUrl', None).split("/")[-1],
+            "externalArgs": json.dumps({"sender_name" : user.get('username', None)})
+        }
+        notification.add_user_notification(payload=notification_payload)
+        
         
     except Exception as e:
         logger.error(f"Error executing price alert task: {e}")

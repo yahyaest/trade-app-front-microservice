@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { getCoin, getCoinByName, getCoinsList } from "@/services/crypto";
+import { CryptoCoin } from "@/models/cryptoCoin";
+import { User } from "@/models/user";
 import { Dropdown } from "primereact/dropdown";
 import { Avatar } from "primereact/avatar";
-import { CryptoCoin } from "@/models/cryptoCoin";
-import { getCoin, getCoinByName, getCoinsList } from "@/services/crypto";
-import Cookies from "js-cookie";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { InputNumber } from "primereact/inputnumber";
 import { RadioButton } from "primereact/radiobutton";
@@ -22,6 +23,9 @@ const PriceAlertTask = (props: any) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const token = Cookies.get("token") as string;
+  const user = Cookies.get("user")
+    ? (JSON.parse(Cookies.get("user") as string) as User)
+    : null;
 
   const setTaskTypeData = async () => {
     const coinsList = await getCoinsList(token);
@@ -31,6 +35,7 @@ const PriceAlertTask = (props: any) => {
   useEffect(() => {
     async function fetchData() {
       await setTaskTypeData();
+      setTaskArgs({ ...taskArgs, user, priceDirection });
     }
     fetchData();
   }, []);

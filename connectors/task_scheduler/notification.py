@@ -1,5 +1,6 @@
 import json
 import requests
+import os
 from task_scheduler_app import settings
 from task_scheduler_app.clients.gateway import Gateway
 from task_scheduler_app.tools.helpers import *
@@ -7,7 +8,7 @@ from task_scheduler_app.tools.helpers import *
 
 class Notification:
     def __init__(self) -> None:
-        self.notification_base_url = settings.NOTIFICATION_BASE_URL
+        self.notification_base_url = os.getenv('NOTIFICATION_BASE_URL')
         self.notification_url = f'{self.notification_base_url}/api/notifications'
         self.bulk_notification_url = f'{self.notification_base_url}/api/bulk_notifications'
         self.token = None
