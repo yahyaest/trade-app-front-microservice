@@ -1,5 +1,6 @@
 import React from "react";
 import PriceAlertTask from "./task/priceAlertTask";
+import WalletHistory from "./task/walletHistory";
 
 const TaskArgs = (props: any) => {
   const { taskType, taskArgs, setTaskArgs } = props;
@@ -12,6 +13,7 @@ const TaskArgs = (props: any) => {
       {taskType.name === "Price Alert" && (
         <PriceAlertTask taskArgs={taskArgs} setTaskArgs={setTaskArgs} />
       )}
+      {taskType.name === "Wallet History" && <WalletHistory taskArgs={taskArgs} setTaskArgs={setTaskArgs} />}
     </div>
   );
 };

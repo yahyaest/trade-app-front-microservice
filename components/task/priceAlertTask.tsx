@@ -103,6 +103,7 @@ const PriceAlertTask = (props: any) => {
 
   return (
     <>
+      <p className="text-sm">(Task for sending notification alert if chosen coin is over/under target price)</p>
       <div className="my-5">
         <label htmlFor="coin" className="font-bold block mb-2">
           Coin <span className="text-xs">(with current price)</span>

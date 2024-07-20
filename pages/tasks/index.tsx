@@ -119,6 +119,7 @@ const TasksPage: Page = (props: any) => {
           className="w-full surface-card py-8 px-5 sm:px-8"
           style={{ borderRadius: "53px" }}
         >
+          <h1 className="text-left text-2xl">Create Task Form</h1>
           <div className="my-5">
             <label
               htmlFor="taskName"
