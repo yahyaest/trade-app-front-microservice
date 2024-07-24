@@ -27,6 +27,7 @@ const TasksPage: Page = (props: any) => {
   const [isTaskPeriodic, setIsTaskPeriodic] = useState<boolean>(false);
   const [cronExpression, setCronExpression] = useState<string>("");
   const [retryNumber, setRetryNumber] = useState<number>(0);
+  const [isSubmit, setIsSubmit] = useState<boolean>(true);
   // Task Args States
   const [taskArgs, setTaskArgs] = useState<Object>({});
 
@@ -43,7 +44,7 @@ const TasksPage: Page = (props: any) => {
   const tasksList = [
     { name: "Wallet History" }, // TODO: to be removed and created by admin for each user
     { name: "Price Alert" },
-    { name: "Order Placement" },
+    { name: "Buy Crypto Coin" },
   ];
 
   const errorToast = (error: string) => {
@@ -53,6 +54,14 @@ const TasksPage: Page = (props: any) => {
       detail: error,
       life: 3000,
     });
+  };
+
+  const handleSubmitState = () => {
+    if (!taskName || !taskType || (isTaskPeriodic && !cronExpression)) {
+      setIsSubmit(false);
+    } else {
+      setIsSubmit(true);
+    }
   };
 
   const onTaskTypeChange = async (e: any) => {
@@ -80,7 +89,8 @@ const TasksPage: Page = (props: any) => {
   useEffect(() => {
     // if (coinsList) setLoading(false);
     setLoading(false);
-  }, []);
+    handleSubmitState();
+  }, [taskName, taskType, isTaskPeriodic, cronExpression]);
 
   if (error) {
     console.log(error);
@@ -215,6 +225,8 @@ const TasksPage: Page = (props: any) => {
               taskType={taskType}
               taskArgs={taskArgs}
               setTaskArgs={setTaskArgs}
+              isTaskPeriodic={isTaskPeriodic}
+              setIsSubmit={setIsSubmit}
             />
           )}
 
@@ -224,6 +236,7 @@ const TasksPage: Page = (props: any) => {
             label="Submit"
             className="w-20rem p-3 text-xl"
             onClick={() => submitTask()}
+            disabled={!isSubmit}
           ></Button>
         </div>
       </div>

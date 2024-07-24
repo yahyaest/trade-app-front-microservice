@@ -1,9 +1,10 @@
 import React from "react";
 import PriceAlertTask from "./task/priceAlertTask";
-import WalletHistory from "./task/walletHistory";
+import WalletHistoryTask from "./task/walletHistoryTask";
 
 const TaskArgs = (props: any) => {
-  const { taskType, taskArgs, setTaskArgs } = props;
+  const { taskType, taskArgs, setTaskArgs, isTaskPeriodic, setIsSubmit } =
+    props;
 
   return (
     <div className="my-5">
@@ -11,9 +12,19 @@ const TaskArgs = (props: any) => {
         Task <strong>{(taskType as { name: string }).name}</strong> Args
       </h4>
       {taskType.name === "Price Alert" && (
-        <PriceAlertTask taskArgs={taskArgs} setTaskArgs={setTaskArgs} />
+        <PriceAlertTask
+          taskArgs={taskArgs}
+          setTaskArgs={setTaskArgs}
+          setIsSubmit={setIsSubmit}
+        />
       )}
-      {taskType.name === "Wallet History" && <WalletHistory taskArgs={taskArgs} setTaskArgs={setTaskArgs} />}
+      {taskType.name === "Wallet History" && (
+        <WalletHistoryTask
+          taskArgs={taskArgs}
+          setTaskArgs={setTaskArgs}
+          setIsSubmit={setIsSubmit}
+        />
+      )}
     </div>
   );
 };

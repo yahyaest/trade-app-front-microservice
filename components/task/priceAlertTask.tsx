@@ -10,7 +10,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { RadioButton } from "primereact/radiobutton";
 
 const PriceAlertTask = (props: any) => {
-  const { taskArgs, setTaskArgs } = props;
+  const { taskArgs, setTaskArgs, setIsSubmit } = props;
   const [coinsList, setCoinsList] = useState<string[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<CryptoCoin | null>(null);
   const [selectedCoinValue, setSelectedCoinValue] = useState<string>("");
@@ -32,13 +32,24 @@ const PriceAlertTask = (props: any) => {
     setCoinsList(coinsList);
   };
 
+  const handleSubmitState = () => {
+    if (selectedCoin) {
+      setIsSubmit(true);
+    } else {
+      setIsSubmit(false);
+    }
+  };
+
   useEffect(() => {
     async function fetchData() {
       await setTaskTypeData();
       setTaskArgs({ ...taskArgs, user, priceDirection });
     }
-    fetchData();
-  }, []);
+    if (!coinsList.length) {
+      fetchData();
+    }
+    handleSubmitState();
+  }, [selectedCoin]);
 
   const onCoinChange = async (e: any) => {
     setLoading(true);
@@ -103,7 +114,10 @@ const PriceAlertTask = (props: any) => {
 
   return (
     <>
-      <p className="text-sm">(Task for sending notification alert if chosen coin is over/under target price)</p>
+      <p className="text-sm">
+        (Task for sending notification alert if chosen coin is over/under target
+        price)
+      </p>
       <div className="my-5">
         <label htmlFor="coin" className="font-bold block mb-2">
           Coin <span className="text-xs">(with current price)</span>

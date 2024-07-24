@@ -1,20 +1,15 @@
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { getCoin, getCoinByName, getCoinsList } from "@/services/crypto";
-import { CryptoCoin } from "@/models/cryptoCoin";
 import { User } from "@/models/user";
-import { Dropdown } from "primereact/dropdown";
-import { Avatar } from "primereact/avatar";
-import { ProgressSpinner } from "primereact/progressspinner";
-import { InputNumber } from "primereact/inputnumber";
-import { RadioButton } from "primereact/radiobutton";
-import { Checkbox } from "primereact/checkbox";
 import { Wallet } from "@/models/wallet";
-import { getUserWallets, getWalletByName } from "@/services";
+import { getUserWallets } from "@/services";
+import { Dropdown } from "primereact/dropdown";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { Checkbox } from "primereact/checkbox";
 import { Tag } from "primereact/tag";
 
-const WalletHistory = (props: any) => {
-  const { taskArgs, setTaskArgs } = props;
+const WalletHistoryTask = (props: any) => {
+  const { taskArgs, setTaskArgs, setIsSubmit } = props;
   const [walletList, setWalletList] = useState<string[]>([]);
   const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
   const [selectAllWallets, setSelectAllWallets] = useState<boolean>(false);
@@ -31,13 +26,24 @@ const WalletHistory = (props: any) => {
     setWalletList(walletList);
   };
 
+  const handleSubmitState = () => {
+    if (selectedWallet || selectAllWallets) {
+      setIsSubmit(true);
+    } else {
+      setIsSubmit(false);
+    }
+  };
+
   useEffect(() => {
     async function fetchData() {
       await setTaskTypeData();
       // setTaskArgs({ ...taskArgs });
     }
-    fetchData();
-  }, []);
+    if (!walletList.length) {
+      fetchData();
+    }
+    handleSubmitState();
+  }, [selectedWallet, selectAllWallets]);
 
   const onWalletChange = async (e: any) => {
     setLoading(true);
@@ -129,4 +135,4 @@ const WalletHistory = (props: any) => {
   );
 };
 
-export default WalletHistory;
+export default WalletHistoryTask;
