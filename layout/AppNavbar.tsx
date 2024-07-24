@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
+import Image from "next/image";
+import UserContext from "../store/user-context";
+import NotificationComponent from "@/components/notifications";
 import { Menubar } from "primereact/menubar";
 import { Badge } from "primereact/badge";
 import { Avatar } from "primereact/avatar";
-import UserContext from "../store/user-context";
-import Image from "next/image";
 import { useRouter } from "next/router";
 import { Button } from "primereact/button";
-import NotificationComponent from "@/components/notifications";
 
 export default function AppNavbar() {
   const userCtx = useContext(UserContext);
@@ -79,7 +79,7 @@ export default function AppNavbar() {
     <div className="flex align-items-center justify-content-end gap-2">
       {userCtx?.user && (
         <>
-          <NotificationComponent/>
+          <NotificationComponent />
           <Button
             icon="pi pi-sign-out"
             rounded

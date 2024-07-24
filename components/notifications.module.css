@@ -1,0 +1,23 @@
+.ping {
+  background: crimson;
+  border-radius: 100%;
+  border: 3px solid #222;
+  width: 25px;
+  height: 25px;
+  animation: load 1.5s ease-out infinite;
+}
+
+@keyframes load {
+  0% {
+    background: crimson;
+    border: 0px solid #fff;
+  }
+  50% {
+    background: crimson;
+    border: 3px solid #222;
+  }
+  100% {
+    background: crimson;
+    border: 0px solid #222;
+  }
+}

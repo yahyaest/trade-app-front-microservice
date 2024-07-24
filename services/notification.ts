@@ -109,7 +109,6 @@ export const getUserNotifications = async (email: string) => {
     };
     const response = await axios.get(notificationUrl, options);
     const notification = response.data;
-    console.log("Notifications: ", notification);
 
     return notification;
   } catch (error) {
