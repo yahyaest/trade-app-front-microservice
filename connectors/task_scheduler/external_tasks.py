@@ -3,6 +3,8 @@ import random
 import glob
 import os
 import json
+import asyncio
+import websockets
 from django_celery_results.models import TaskResult
 from django_celery_beat.models import PeriodicTask
 from task_scheduler_app.tools.helpers import logger
@@ -21,6 +23,18 @@ from task_scheduler_app.clients.wallet import Wallet
 # This celery tasks file will be empty as it will be loaded by replacing it content from the task_scheduler_app/api/tasks.py file from the docker container volume like this:
 # volumes:
 #   - ./task_scheduler_app/api/tasks.py:/code/task_scheduler_app/api/tasks.py
+
+async def send_websoket_message(email, message):
+    """
+    Sends a message to a specific user on the WebSocket server.
+    """
+    server_url = f"ws://task_scheduler:8765?source={email}"
+    async with websockets.connect(server_url) as websocket:
+        try:
+            await websocket.send(message)
+        except Exception as e:
+            logger.error(f"Error sending message to {email}: {e}")
+
 
 @task_autoretry(bind=True)
 def hello_ko(self, *args, **kwargs):
@@ -132,8 +146,16 @@ def price_alert(self, *args, **kwargs):
             "userImage": user.get('avatarUrl', None).split("/")[-1],
             "externalArgs": json.dumps({"sender_name" : user.get('username', None)})
         }
-        notification.add_user_notification(payload=notification_payload)
+        notification = notification.add_user_notification(payload=notification_payload)
         
+        # Send websocket notification
+        notification_payload["id"] = notification.get("id", None)
+        logger.info(f"Sending websocket notification for coin {coin_name} for user {user.get('email', None)}")
+        asyncio.run(send_websoket_message(
+            email=user.get('email', None), 
+            message=json.dumps(notification_payload)
+            ))
+
     except Exception as e:
         logger.error(f"Error executing price alert task: {e}")
         raise e 

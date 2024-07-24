@@ -26,16 +26,21 @@ gateway_ip=$(getent hosts gateway | awk '{ print $1 }')
 notification_ip=$(getent hosts notification | awk '{ print $1 }')
 crypto_ip=$(getent hosts crypto | awk '{ print $1 }')
 wallet_ip=$(getent hosts wallet | awk '{ print $1 }')
+task_scheduler_ip=$(getent hosts task_scheduler | awk '{ print $1 }')
 
 export GATEWAY_BASE_URL=http://$gateway_ip:3000
 export NOTIFICATION_BASE_URL=http://$notification_ip:8000
 export CRYPTO_BASE_URL=http://$crypto_ip:3000
 export WALLET_BASE_URL=http://$wallet_ip:3000
+export TASK_SCHEDULER_URL=http://$task_scheduler_ip:5000
 export JWT_SECRET='super-secret'
 
 yes | python manage.py makemigrations > /dev/stderr
 yes | python manage.py makemigrations api > /dev/stderr
 yes yes | python manage.py migrate > /dev/stderr
+
+pip install websockets
+python /code/task_scheduler_app/clients/socket_server.py &
 
 # remove the pid celery workers files
 for i in $(seq 1 $CELERY_WORKERS_COUNT)
