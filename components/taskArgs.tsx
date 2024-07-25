@@ -1,5 +1,6 @@
 import React from "react";
 import PriceAlertTask from "./task/priceAlertTask";
+import PlaceOrderTask from "./task/placeOrderTask";
 import WalletHistoryTask from "./task/walletHistoryTask";
 
 const TaskArgs = (props: any) => {
@@ -22,6 +23,14 @@ const TaskArgs = (props: any) => {
         <WalletHistoryTask
           taskArgs={taskArgs}
           setTaskArgs={setTaskArgs}
+          setIsSubmit={setIsSubmit}
+        />
+      )}
+      {taskType.name === "Buy Crypto Coin" && (
+        <PlaceOrderTask
+          taskArgs={taskArgs}
+          setTaskArgs={setTaskArgs}
+          isTaskPeriodic={isTaskPeriodic}
           setIsSubmit={setIsSubmit}
         />
       )}
