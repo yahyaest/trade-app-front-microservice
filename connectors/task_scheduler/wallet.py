@@ -97,4 +97,48 @@ class Wallet:
         except Exception as error:
             logger.error("Error posting wallet history:", error)
     
+    def get_wallet(self, wallet_id):
+        try:
+            if not self.token:
+                raise ValueError("No token was provided. Failed to get wallet")
+            
+            headers = {
+                'Authorization': f'Bearer {self.token}'
+            }
+            
+            response = requests.get(f'{self.wallets_url}/{wallet_id}', verify=False, headers=headers)
+            if response.status_code == 200:
+                wallet = response.json()
+                return wallet
+            else:
+                logger.error("=====> get wallet failed --> failed")
+                logger.error(response.status_code)
+                logger.error(response.text)
+            return None
+        except Exception as error:
+            logger.error(f"Failed to get wallet: {error}")
+
+    def update_wallet(self, wallet_id, data: dict):
+        try:
+            if not self.token:
+                raise ValueError("No token was provided. Failed to update wallet")
+
+            headers = {
+                'Authorization': f'Bearer {self.token}'
+            }
+            
+            payload = data            
+            response = requests.patch(f'{self.wallets_url}/{wallet_id}', verify=False, data=payload, headers=headers)
+            
+            if response.status_code == 200:
+                wallet = response.json()
+                return wallet
+            else:
+                logger.error("=====> updating wallet failed --> failed")
+                logger.error(response.status_code)
+                logger.error(response.text)
+            return None
+
+        except Exception as error:
+            logger.error("Error updating wallet:", error)
     

@@ -137,7 +137,7 @@ def price_alert(self, *args, **kwargs):
         notification = Notification()
         notification.token = token
         notification_payload = {
-            "message": f"The coin {coin_name} with price alert {'over' if price_direction == 'over' else 'under'} {price_alert} $ has reached the price of {current_coin_price} $",
+            "message": f"The coin {coin_name} with price alert {'over' if price_direction == 'over' else 'under'} {round(price_alert, 2)} $ has reached the price of {round(float(current_coin_price), 2)} $",
             "sender": user.get('email', None),
             "title": f"Price Alert for coin {coin_name}",
             "userId": user.get('id', None),
@@ -239,3 +239,145 @@ def wallet_history(self, *args, **kwargs):
     except Exception as e:
         logger.error(f"Error executing wallet history task: {e}")
         raise e 
+
+@task_autoretry(bind=True)
+def buy_crypto_coin(self, *args, **kwargs):
+    try:
+        logger.info("Start Executing Buy Crypto Coin Task")
+        logger.info(f"Executing task id {self.request.id}, args: {self.request.args!r} kwargs: {self.request.kwargs!r}")
+        logger.info("The given kwargs are:")
+        logger.info(kwargs)
+        logger.info("The given args are:")
+        logger.info(args)
+        
+        # Get Token
+        task_scheduler_credentials = {
+            "email" : os.environ.get("TASK_SCHEDULER_USERNAME"), 
+            "password" : os.environ.get("TASK_SCHEDULER_PASSWORD")
+            }
+
+        gateway = Gateway()
+        gateway.login(task_scheduler_credentials)
+        token = gateway.token
+        
+        if not token:
+            raise ValueError("No token was provided. Failed executing price alert task")
+        
+        # Set Wallets History
+        wallet = kwargs.get("wallet", None)
+        coin = kwargs.get("coin", None)
+        coin_amount = kwargs.get("coinAmount", None)
+        user = kwargs.get("user", None)
+        
+        if not user:
+            logger.warning("No user were provided. Nothing to do")
+            return
+        
+        if not wallet:
+            logger.warning("No wallet were provided. Nothing to do")
+            return
+        
+        if not coin:
+            logger.warning("No coin were provided. Nothing to do")
+            return
+        
+        if not coin_amount:
+            logger.warning("No coin amount were provided. Nothing to do")
+            return
+        
+        wallet_connector = Wallet()
+        wallet_connector.token = token
+        crypto = Crypto()
+        crypto.token = token
+        
+        # Check if wallet has enough money
+        wallet_id = wallet.get('id', None)
+        wallet = wallet_connector.get_wallet(wallet_id) # Get latest wallet info
+        wallet_current_value = float(wallet.get('currentValue', None))
+        coin = crypto.get_coin(coin_id=coin.get('id', None)) # Get latest coin info
+        logger.info(f"Coin price: {coin.get('price', None)}")
+        transaction_cost = float(coin.get('price', None)) * coin_amount
+        logger.info(f"Transaction cost: {transaction_cost}")
+        if wallet_current_value < transaction_cost:
+            logger.warning(f"Wallet {wallet.get('name', None)} with value {wallet_current_value} has not enough money to buy {coin_amount} {coin.get('name', None)} coins with a total cost of {transaction_cost}")
+            
+            # Disable task and related periodic task
+            task_id = kwargs.get("task_id", None)
+            logger.info(f"Disabling task with id {task_id}")
+            task= Task.objects.get(id=task_id)
+            if task.cron_expression:
+                logger.info(f"Disabling periodic task with id {task.periodic_task}")
+                task.enabled = False
+                task.save()
+                periodic_task_id = task.periodic_task
+                periodic_task = PeriodicTask.objects.get(pk=periodic_task_id)
+                periodic_task.enabled = False
+                periodic_task.save()
+            else:
+                logger.info(f"Task is not a periodic task, nothing to do")
+            return
+        
+        # Post transaction
+        logger.info(f"Buying {coin_amount} {coin.get('name', None)} for wallet {wallet.get('name', None)}")
+                
+        transaction_payload = {
+            "wallet": wallet.get('name', None),
+            "username": user.get('email', None),
+            "action": "BUY",
+            "type": "CRYPTO",
+            "amount": coin_amount,
+            "name": coin.get('name', None),
+            "symbol": coin.get('symbol', None),
+            "unit_price": coin.get('price', None),
+            "value": str(transaction_cost),
+        }
+        
+        transaction = crypto.post_transaction(transaction_payload)
+        if transaction :
+            logger.info(f"Transaction for {coin_amount} {coin.get('name', None)} for wallet {wallet.get('name', None)} was successfully created")
+        
+        # Update wallet
+        logger.info(f"Updating wallet {wallet.get('name', None)}")
+        
+        wallet_current_value = float(wallet.get('currentValue', None))
+        wallet_current_value = wallet_current_value - transaction_cost
+        
+        logger.info(f"New wallet value: {wallet_current_value}")
+        
+        wallet_update_payload = {
+            "currentValue": str(wallet_current_value)
+        }
+        
+        wallet_response = wallet_connector.update_wallet(wallet_id, wallet_update_payload)
+        if wallet_response:
+            logger.info(f"Wallet {wallet.get('name', None)} was successfully updated")
+        
+        # Send notification
+        logger.info(f"Sending buy crypto coin notification for coin {coin.get('name', None)}")
+        notification = Notification()
+        notification.token = token
+        notification_payload = {
+            "message": f"Bought {coin_amount} {coin.get('name', None)} for wallet {wallet.get('name', None)} at a total cost of {round(transaction_cost, 2)} $",
+            "sender": user.get('email', None),
+            "title": f"Buy {coin_amount} {coin.get('name', None)} Crypto {'Coins' if coin_amount > 1 else 'Coin'}",
+            "userId": user.get('id', None),
+            "username": user.get('username', None),
+            "userEmail": user.get('email', None),
+            "userImage": user.get('avatarUrl', None).split("/")[-1],
+            "externalArgs": json.dumps({"sender_name" : user.get('username', None)})
+        }
+        
+        notification = notification.add_user_notification(payload=notification_payload)
+        
+        # Send websocket notification
+        
+        notification_payload["id"] = notification.get("id", None)
+        logger.info(f"Sending websocket notification for buy crypto coin for user {user.get('email', None)}")
+        asyncio.run(send_websoket_message(
+            email=user.get('email', None), 
+            message=json.dumps(notification_payload)
+            ))
+
+    except Exception as e:
+        logger.error(f"Error executing buy crypto coin task: {e}")
+        raise e

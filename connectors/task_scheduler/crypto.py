@@ -103,3 +103,27 @@ class Crypto:
         except Exception as error:
             logger.error(f"Failed to get transactions: {error}")
             return []
+
+    def post_transaction(self, payload: dict):
+        try:
+            if not self.token:
+                raise ValueError("No token was provided. Failed to post transaction data")
+
+            headers = {
+                'Authorization': f'Bearer {self.token}',
+                'Content-Type': 'application/json'
+            }
+
+            response = requests.post(self.transactions_url, headers=headers, data=json.dumps(payload))
+
+            if response.status_code != 201:
+                logger.error(f"Failed to post transaction")
+                logger.error(response.status_code)
+                logger.error(response.text)
+                return False
+            transaction = response.json()
+            return transaction
+
+        except Exception as error:
+            logger.error(f"Failed to post transaction: {error}")
+            return False
