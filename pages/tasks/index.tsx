@@ -56,7 +56,23 @@ const TasksPage: Page = (props: any) => {
     });
   };
 
-  const handleSubmitState = () => {
+  const createTaskToast = (taskName: string, status: boolean): Promise<void> => {
+    return new Promise((resolve) => {
+      toast.current?.show({
+        severity: status ? "success" : "error",
+        summary: status ? "Task created successfully" : "Failed to create task",
+        detail: status ? `Task ${taskName} created successfully` : `Failed to create task ${taskName}`,
+        life: 3000,
+      });
+  
+      // Resolve the promise after the duration of the toast
+      setTimeout(() => {
+        resolve();
+      }, 3000);
+    });
+  };
+
+  const handleMainSubmitState = () => {
     if (!taskName || !taskType || (isTaskPeriodic && !cronExpression)) {
       setIsSubmit(false);
     } else {
@@ -75,21 +91,24 @@ const TasksPage: Page = (props: any) => {
         name: taskName,
         description: taskDescription,
         task_type: (taskType as { name: string }).name,
-        cron_expression: cronExpression ? cronExpression : null,
+        cron_expression: isTaskPeriodic ? cronExpression ? cronExpression : null : null,
         user: user?.email as string,
         args: taskArgs,
         retry_number: retryNumber ? retryNumber : 0,
       };
       await addTask(token, payload);
+      await createTaskToast(taskName, true);
+      router.reload();
     } catch (error: any) {
       console.log(error.message);
+      createTaskToast(taskName, false);
     }
   };
 
   useEffect(() => {
     // if (coinsList) setLoading(false);
     setLoading(false);
-    handleSubmitState();
+    handleMainSubmitState();
   }, [taskName, taskType, isTaskPeriodic, cronExpression]);
 
   if (error) {
@@ -227,6 +246,7 @@ const TasksPage: Page = (props: any) => {
               setTaskArgs={setTaskArgs}
               isTaskPeriodic={isTaskPeriodic}
               setIsSubmit={setIsSubmit}
+              handleMainSubmitState={handleMainSubmitState}
             />
           )}
 
@@ -251,6 +271,7 @@ const TasksPage: Page = (props: any) => {
             "noopener,noreferrer"
           )
         }
+        className="mb-5"
       />
     </div>
   );
