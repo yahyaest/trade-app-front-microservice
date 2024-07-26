@@ -4,7 +4,7 @@ import PlaceOrderTask from "./task/placeOrderTask";
 import WalletHistoryTask from "./task/walletHistoryTask";
 
 const TaskArgs = (props: any) => {
-  const { taskType, taskArgs, setTaskArgs, isTaskPeriodic, setIsSubmit } =
+  const { taskType, taskArgs, setTaskArgs, isTaskPeriodic, setIsSubmit, handleMainSubmitState } =
     props;
 
   return (
@@ -17,6 +17,7 @@ const TaskArgs = (props: any) => {
           taskArgs={taskArgs}
           setTaskArgs={setTaskArgs}
           setIsSubmit={setIsSubmit}
+          handleMainSubmitState={handleMainSubmitState}
         />
       )}
       {taskType.name === "Wallet History" && (
@@ -24,6 +25,7 @@ const TaskArgs = (props: any) => {
           taskArgs={taskArgs}
           setTaskArgs={setTaskArgs}
           setIsSubmit={setIsSubmit}
+          handleMainSubmitState={handleMainSubmitState}
         />
       )}
       {taskType.name === "Buy Crypto Coin" && (
@@ -32,6 +34,7 @@ const TaskArgs = (props: any) => {
           setTaskArgs={setTaskArgs}
           isTaskPeriodic={isTaskPeriodic}
           setIsSubmit={setIsSubmit}
+          handleMainSubmitState={handleMainSubmitState}
         />
       )}
     </div>

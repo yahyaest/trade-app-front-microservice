@@ -9,7 +9,7 @@ import { Checkbox } from "primereact/checkbox";
 import { Tag } from "primereact/tag";
 
 const WalletHistoryTask = (props: any) => {
-  const { taskArgs, setTaskArgs, setIsSubmit } = props;
+  const { taskArgs, setTaskArgs, setIsSubmit, handleMainSubmitState } = props;
   const [walletList, setWalletList] = useState<string[]>([]);
   const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
   const [selectAllWallets, setSelectAllWallets] = useState<boolean>(false);
@@ -29,6 +29,7 @@ const WalletHistoryTask = (props: any) => {
   const handleSubmitState = () => {
     if (selectedWallet || selectAllWallets) {
       setIsSubmit(true);
+      handleMainSubmitState();
     } else {
       setIsSubmit(false);
     }

@@ -10,7 +10,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { RadioButton } from "primereact/radiobutton";
 
 const PriceAlertTask = (props: any) => {
-  const { taskArgs, setTaskArgs, setIsSubmit } = props;
+  const { taskArgs, setTaskArgs, setIsSubmit, handleMainSubmitState } = props;
   const [coinsList, setCoinsList] = useState<string[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<CryptoCoin | null>(null);
   const [selectedCoinValue, setSelectedCoinValue] = useState<string>("");
@@ -35,6 +35,7 @@ const PriceAlertTask = (props: any) => {
   const handleSubmitState = () => {
     if (selectedCoin) {
       setIsSubmit(true);
+      handleMainSubmitState();
     } else {
       setIsSubmit(false);
     }

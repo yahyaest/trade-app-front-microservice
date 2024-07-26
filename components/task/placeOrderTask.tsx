@@ -13,7 +13,7 @@ import { Tag } from "primereact/tag";
 import { Messages } from "primereact/messages";
 
 const PlaceOrderTask = (props: any) => {
-  const { taskArgs, setTaskArgs, isTaskPeriodic, setIsSubmit } = props;
+  const { taskArgs, setTaskArgs, isTaskPeriodic, setIsSubmit, handleMainSubmitState } = props;
   const msgs = useRef<Messages>(null);
   const [coinsList, setCoinsList] = useState<string[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<CryptoCoin | null>(null);
@@ -43,8 +43,9 @@ const PlaceOrderTask = (props: any) => {
   };
 
   const handleSubmitState = () => {
-    if (coinAmount > 0 && selectedWallet && selectedCoin) {
+    if (coinAmount > 0 && selectedWallet && selectedCoin && !messageShowed) {
       setIsSubmit(true);
+      handleMainSubmitState();
     } else {
       setIsSubmit(false);
     }
