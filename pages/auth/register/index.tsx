@@ -1,19 +1,25 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useRouter } from "next/router";
-import React, { useContext, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
+import Cookies from "js-cookie";
+import { GetServerSideProps } from "next";
+import { Page } from "../../../types/types";
 import AppConfig from "../../../layout/AppConfig";
+import { LayoutContext } from "../../../layout/context/layoutcontext";
+import {
+  register,
+  getCurrentUser,
+  uploadImage,
+  getCurrentUserAvatar,
+} from "@/services";
+import { User } from "@/models/user";
 import { Button } from "primereact/button";
 import { Password } from "primereact/password";
-import { LayoutContext } from "../../../layout/context/layoutcontext";
 import { InputText } from "primereact/inputtext";
 import { classNames } from "primereact/utils";
 import { FileUpload } from "primereact/fileupload";
-import { Page } from "../../../types/types";
-import { register, getCurrentUser, uploadImage, getCurrentUserAvatar } from "@/services";
-import Cookies from "js-cookie";
-import { GetServerSideProps } from "next";
-import { User } from "@/models/user";
+import { Toast } from "primereact/toast";
 
 const LoginPage: Page = () => {
   const [username, setUsername] = useState("");
@@ -24,6 +30,7 @@ const LoginPage: Page = () => {
 
   const { layoutConfig } = useContext(LayoutContext);
 
+  const toast: any = useRef(null);
   const router = useRouter();
 
   const containerClassName = classNames(
@@ -31,20 +38,50 @@ const LoginPage: Page = () => {
     { "p-input-filled": layoutConfig?.inputStyle === "filled" }
   );
 
+  const registerToast = (state: boolean): Promise<void> => {
+    return new Promise((resolve) => {
+      toast.current?.show({
+        severity: state ? "success" : "error",
+        summary: state ? "Register Success" : "Register Failed",
+        detail: state ? "You have successfully Registered" : "Wrong Credential",
+        life: 3000,
+      });
+      // Resolve the promise after the duration of the toast
+      setTimeout(
+        () => {
+          resolve();
+        },
+        state ? 1500 : 3000
+      );
+    });
+  };
+
+  const genericToast = (severity: string, summary: string, message: string) => {
+    toast.current?.show({
+      severity: severity,
+      summary: summary,
+      detail: message,
+      life: 3000,
+    });
+  };
+
   const submit = async () => {
     try {
       if (password !== password2) {
-        alert("Passwords does not match");
+        genericToast("error", "Password", "Passwords does not match");
+        return;
       }
-      const isRegister = await register(username, email, password);
+      const { isRegister, message } = await register(username, email, password);
       if (!isRegister) {
-        alert("Wrong Credential");
+        genericToast("error", "Register Failed", message);
       } else {
-        const user = await getCurrentUser() as User;
+        const user = (await getCurrentUser()) as User;
         // upload image
-        await uploadImage(file, user?.email as string);
-        const userImage = await getCurrentUserAvatar();
-        user.avatarUrl = userImage;
+        if (file) {
+          await uploadImage(file, user?.email as string);
+          const userImage = await getCurrentUserAvatar();
+          if (userImage) user.avatarUrl = userImage;
+        }
         Cookies.set("user", JSON.stringify(user));
         router.push("/");
       }
@@ -55,13 +92,14 @@ const LoginPage: Page = () => {
 
   return (
     <div className={containerClassName}>
+      <Toast ref={toast} />
       <div className="flex flex-column align-items-center justify-content-center">
         <img
           src={`/layout/images/logo-${
             layoutConfig?.colorScheme === "light" ? "dark" : "white"
           }.svg`}
           alt="Sakai logo"
-          className="mb-5 w-6rem flex-shrink-0"
+          className="mb-5 mt-3 w-6rem flex-shrink-0"
         />
         <div
           style={{
@@ -75,19 +113,6 @@ const LoginPage: Page = () => {
             className="w-full surface-card py-8 px-5 sm:px-8"
             style={{ borderRadius: "53px" }}
           >
-            <div className="text-center mb-5">
-              <img
-                src="/demo/images/login/avatar.png"
-                alt="Image"
-                height="50"
-                className="mb-3"
-              />
-              <div className="text-900 text-3xl font-medium mb-3">
-                Welcome, Isabel!
-              </div>
-              <span className="text-600 font-medium">Sign in to continue</span>
-            </div>
-
             <div>
               <label
                 htmlFor="email1"
@@ -138,13 +163,13 @@ const LoginPage: Page = () => {
               ></Password>
 
               <label
-                htmlFor="password1"
+                htmlFor="password2"
                 className="block text-900 font-medium text-xl mb-2"
               >
                 Confirm Password
               </label>
               <Password
-                inputId="password1"
+                inputId="password2"
                 value={password2}
                 onChange={(e) => setPassword2(e.target.value)}
                 placeholder="Confirm Password"
@@ -162,7 +187,7 @@ const LoginPage: Page = () => {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setFile(e.target.files[0])}
+                onChange={(e) => setFile((e.target.files as any)[0])}
               />
 
               <div className="flex align-items-center justify-content-between mb-5 gap-5"></div>
@@ -170,6 +195,7 @@ const LoginPage: Page = () => {
                 label="Register"
                 className="w-full p-3 text-xl"
                 onClick={() => submit()}
+                disabled={!username || !email || !password || !password2}
               ></Button>
               <span className="">
                 <p className="font-medium no-underline my-3">

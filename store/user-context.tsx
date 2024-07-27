@@ -28,7 +28,7 @@ export function UserContextProvider(props: any) {
           const user = await getCurrentUser();
           const avatar = await getCurrentUserAvatar();
           setCurrentUser(user);
-          setCurrentAvatar(avatar)
+          if(avatar) setCurrentAvatar(avatar)
         }
       // const session = await getSession();
       // if (session) {

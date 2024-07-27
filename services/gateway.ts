@@ -12,11 +12,13 @@ export const register = async (
     const signUpUrl = `${gatewayBaseUrl}/api/auth/signup`;
     const redister = await axios.post(signUpUrl, { username, email, password });
     const token = redister.data.access_token;
-    if (!token) return false;
+    if (!token) return { isRegister: false, message: "No token was provided" };
     Cookies.set("token", token);
-    return true;
-  } catch (error) {
+    return { isRegister: true, message: "You have successfully Registered" };
+  } catch (error : any) {
     console.error("Error register user:", error);
+    console.error(error.response.data.message);
+    return { isRegister: false, message: error.response.data.message };
   }
 };
 
@@ -40,16 +42,16 @@ export const logout = () => {
 };
 
 export const getToken = async (email: string, password: string) => {
-	try {
-		const gatewayBaseUrl = process.env.GATEWAY_BASE_URL;
-		const signInUrl = `${gatewayBaseUrl}/api/auth/signin`;
-		const login = await axios.post(signInUrl, { email, password });
-		const token = login.data.access_token;
-		if (!token) return null;
-		return token;
-	} catch (error) {
-		console.error('Failed to get token:', error);
-	}
+  try {
+    const gatewayBaseUrl = process.env.GATEWAY_BASE_URL;
+    const signInUrl = `${gatewayBaseUrl}/api/auth/signin`;
+    const login = await axios.post(signInUrl, { email, password });
+    const token = login.data.access_token;
+    if (!token) return null;
+    return token;
+  } catch (error) {
+    console.error("Failed to get token:", error);
+  }
 };
 
 export const getCurrentUser = async () => {
@@ -74,25 +76,25 @@ export const getCurrentUser = async () => {
 };
 
 export const getUserByEmail = async (email: string, token: string) => {
-	try {
-		// Token need to be of admin user
+  try {
+    // Token need to be of admin user
     const gatewayBaseUrl = process.env.GATEWAY_BASE_URL;
-		const currentUserUrl = `${gatewayBaseUrl}/api/users/?email=${email}`;
-		if (!token) {
-			throw Error('No token was provided. Failed to get current user data');
-		}
-		const options: any = {
-			headers: {
-				Authorization: `Bearer ${token}`
-			}
-		};
-		const response = await axios.get(currentUserUrl, options);
-		const user = response.data[0];
-		return user as User;
-	} catch (error) {
-		console.error('Error fetching current user:', error);
-		alert(error);
-	}
+    const currentUserUrl = `${gatewayBaseUrl}/api/users/?email=${email}`;
+    if (!token) {
+      throw Error("No token was provided. Failed to get current user data");
+    }
+    const options: any = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const response = await axios.get(currentUserUrl, options);
+    const user = response.data[0];
+    return user as User;
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+    alert(error);
+  }
 };
 
 export const getUsers = async () => {
@@ -149,30 +151,30 @@ export const getCurrentUserAvatar = async () => {
     const response = await axios.get(currentUserAvatarUrl, options);
     const image = response.data;
     const imageUrl = `${gatewayBaseUrl}/${image.filename}`;
-    return imageUrl;
+    return image ? imageUrl : null;
   } catch (error) {
     console.error("Error fetching image:", error);
   }
 };
 
 export const getUserAvatar = async (username: string, token: string) => {
-	// Token need to be of admin user
-	try {
-		const gatewayBaseUrl = process.env.GATEWAY_BASE_URL;
-		const currentUserAvatarUrl = `${gatewayBaseUrl}/api/images/?username=${username}`;
-		if (!token) {
-			throw Error('No token was provided. Failed to get current user data');
-		}
-		const options: any = {
-			headers: {
-				Authorization: `Bearer ${token}`
-			}
-		};
-		const response = await axios.get(currentUserAvatarUrl, options);
-		const image = response.data;
-		const imageUrl = `${image[0].filename}`;
-		return imageUrl;
-	} catch (error) {
-		console.error('Error fetching image:', error);
-	}
+  // Token need to be of admin user
+  try {
+    const gatewayBaseUrl = process.env.GATEWAY_BASE_URL;
+    const currentUserAvatarUrl = `${gatewayBaseUrl}/api/images/?username=${username}`;
+    if (!token) {
+      throw Error("No token was provided. Failed to get current user data");
+    }
+    const options: any = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const response = await axios.get(currentUserAvatarUrl, options);
+    const image = response.data;
+    const imageUrl = `${image[0].filename}`;
+    return imageUrl;
+  } catch (error) {
+    console.error("Error fetching image:", error);
+  }
 };

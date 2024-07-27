@@ -93,7 +93,7 @@ export default function AppNavbar() {
           />
           <Avatar
             image={
-              userCtx.avatar ? userCtx.avatar : "/images/default_avatar.webp"
+              userCtx.avatar ? userCtx.avatar : "/images/avatar-default-icon.png"
             }
             shape="circle"
             className="mx-1 w-3rem h-3rem sm:mx-5"
