@@ -3,7 +3,10 @@ import { useRouter } from "next/router";
 import Cookies from "js-cookie";
 import UserContext from "@/store/user-context";
 import socketClient from "@/tools/websocket";
-import { getUserNotifications } from "@/services/notification";
+import {
+  getUserNotifications,
+  updateNotification,
+} from "@/services/notification";
 import { formatRelativeTime } from "@/utils/utils";
 import { Avatar } from "primereact/avatar";
 import { Badge } from "primereact/badge";
@@ -24,6 +27,11 @@ export default function NotificationComponent(props: any) {
   ] = useState<boolean>(false);
   const [displayNotifications, setDisplayNotifications] =
     useState<boolean>(false);
+
+  const [hoveredNotification, setHoveredNotification] =
+    useState<Notification | null>();
+  const [hovering, setHovering] = useState<boolean>(false);
+  const [timer, setTimer] = useState<any>(null);
 
   const messageHandler = (event: MessageEvent) => {
     try {
@@ -78,6 +86,25 @@ export default function NotificationComponent(props: any) {
     fetchData();
   }, [userCtx]);
 
+  useEffect(() => {
+    if (hovering) {
+      const id = setTimeout(async () => {
+        await updateNotification(hoveredNotification?.id as number, {
+          seen: true,
+        });
+      }, 3000);
+      console.log("id", id);
+      setTimer(id);
+    } else {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    }
+
+    // Cleanup timer on component unmount
+    return () => clearTimeout(timer);
+  }, [hovering]);
+
   return (
     <div
       className="px-0 sm:px-3"
@@ -119,6 +146,7 @@ export default function NotificationComponent(props: any) {
         >
           <ul className="dropdown-menu-list">
             {notifications
+              .filter((notification) => !notification.seen)
               .slice(0, 5)
               .map((notification: Notification, index: number) => (
                 <li
@@ -126,6 +154,14 @@ export default function NotificationComponent(props: any) {
                   className="flex flex-row justify-center items-center dropdown-menu-item hover:bg-gray-300 p-1 gap-1"
                   style={{
                     borderRadius: index === 0 ? "0.5rem 0.5rem 0 0" : "0 0 0 0",
+                  }}
+                  onMouseOver={() => {
+                    setHovering(true);
+                    setHoveredNotification(notification);
+                  }}
+                  onMouseOut={() => {
+                    setHovering(false);
+                    setHoveredNotification(null);
                   }}
                 >
                   <div className="dropdown-menu-icon align-self-center  mt-1">
@@ -150,6 +186,16 @@ export default function NotificationComponent(props: any) {
                   >
                     {notification.sentSince}
                   </div>
+                  {!notification.seen && (
+                    <div
+                      className="align-self-center mx-1 bg-blue-500"
+                      style={{
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "100%",
+                      }}
+                    ></div>
+                  )}
                 </li>
               ))}
 
