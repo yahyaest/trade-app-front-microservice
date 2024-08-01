@@ -122,18 +122,25 @@ const Layout = ({ children }: ChildContainerProps) => {
     return (
         <React.Fragment>
             <Head>
-                <title>Sakai by PrimeReact | Free Admin Template for NextJS</title>
+                <title>All In One Trade Simulator</title>
                 <meta charSet="UTF-8" />
-                <meta name="description" content="The ultimate collection of design-agnostic, flexible and accessible React UI Components." />
+                <meta name="description" content=" Master trading with our comprehensive simulator that offers real-time market scenarios, advanced analytics, and customizable strategies. Perfect for traders of all levels looking to practice and refine their skills in a risk-free environment." />
                 <meta name="robots" content="index, follow" />
                 <meta name="viewport" content="initial-scale=1, width=device-width" />
                 <meta property="og:type" content="website"></meta>
-                <meta property="og:title" content="Sakai by PrimeReact | Free Admin Template for NextJS"></meta>
+                <meta property="og:title" content="All In One Trade Simulator"></meta>
                 <meta property="og:url" content="https://www.primefaces.org/sakai-react"></meta>
-                <meta property="og:description" content="The ultimate collection of design-agnostic, flexible and accessible React UI Components." />
+                <meta property="og:description" content=" Master trading with our comprehensive simulator that offers real-time market scenarios, advanced analytics, and customizable strategies. Perfect for traders of all levels looking to practice and refine their skills in a risk-free environment." />
                 <meta property="og:image" content="https://www.primefaces.org/static/social/sakai-nextjs.png"></meta>
                 <meta property="og:ttl" content="604800"></meta>
-                <link rel="icon" href={`/favicon.ico`} type="image/x-icon"></link>
+                <link rel="icon" href="/favicon.ico" type="image/x-icon"></link>
+                <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"></link>
+                <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"></link>
+                <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"></link>
+                <link rel="manifest" href="/site.webmanifest"></link>
+                <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"></link>
+                <meta name="msapplication-TileColor" content="#da532c"></meta>
+                <meta name="theme-color" content="#ffffff"></meta>
             </Head>
 
             {/* <div className={containerClass}> */}
