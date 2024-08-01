@@ -91,13 +91,11 @@ export const addProductOwnerNotification = async (
   }
 };
 
-export const getUserNotifications = async (email: string) => {
+export const getUserNotifications = async (email: string, userToken = null) => {
   try {
     const notificationBaseUrl = process.env.NOTIFICATION_BASE_URL;
     const notificationUrl = `${notificationBaseUrl}/api/notifications/?userEmail=${email}`;
-    const token = Cookies.get("token")
-      ? Cookies.get("token")
-      : cookies().get("token")?.value;
+    const token = Cookies.get("token") ? Cookies.get("token") : userToken;
     if (!token) {
       throw Error("No token was provided. Failed to post notification");
     }

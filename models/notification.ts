@@ -1,7 +1,7 @@
 export interface Notification {
 	id?: number;
-	createdAt?: Date;
-	updatedAt?: Date;
+	createdAt?: Date | string | any;
+	updatedAt?: Date | string | any;
 	userEmail: string;
 	username: string;
 	userImage: string;
