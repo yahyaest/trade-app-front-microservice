@@ -60,7 +60,7 @@ export default function NotificationComponent(props: any) {
     if (userNotifications) {
       userNotifications = userNotifications.sort(
         (a: Notification, b: Notification) =>
-          new Date(b.createdAt) - new Date(a.createdAt)
+          (new Date(b.createdAt) as any) - (new Date(a.createdAt) as any)
       );
 
       // Populate Notifications with sentSince attribute
@@ -93,7 +93,6 @@ export default function NotificationComponent(props: any) {
           seen: true,
         });
       }, 3000);
-      console.log("id", id);
       setTimer(id);
     } else {
       if (timer) {
@@ -200,8 +199,12 @@ export default function NotificationComponent(props: any) {
               ))}
 
             <li
-              className="text-center hover:bg-gray-300 p-1 my-1"
+              className="text-center cursor-pointer hover:bg-gray-300 p-1 my-1"
               style={{ borderRadius: "0 0 0.5rem 0.5rem" }}
+              onClick={() => {
+                router.push("/notifications");
+                setDisplayNotifications(false);
+              }}
             >
               See All Notifications
             </li>

@@ -115,6 +115,12 @@ const WalletPage: Page = (props: any) => {
     : null;
   const home = { icon: "pi pi-home", label: "icons", url: "/" };
 
+  useEffect(() => {
+    if (wallet) setLoading(false);
+    setBestAndLeastAssetsGain();
+    handleScreenChange();
+  }, []);
+
   const walletCardInfo = {
     label: "Balance",
     balance: formatCurrency(+wallet?.currentValue + nonSoldAssetsValue),
@@ -151,8 +157,8 @@ const WalletPage: Page = (props: any) => {
             {card.data
               .sort(
                 (a: Transaction, b: Transaction) =>
-                  ((new Date(b.createdAt) as any) -
-                    new Date(a.createdAt)) as any
+                  (new Date(b.createdAt) as any) -
+                  (new Date(a.createdAt) as any)
               )
               .slice(0, 4)
               .map((e: Asset | Transaction) => {
@@ -237,12 +243,6 @@ const WalletPage: Page = (props: any) => {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (wallet) setLoading(false);
-    setBestAndLeastAssetsGain();
-    handleScreenChange();
-  }, []);
 
   if (loading) {
     return (
@@ -527,8 +527,8 @@ const WalletPage: Page = (props: any) => {
                 transactions={walletTransactions
                   .sort(
                     (a: Transaction, b: Transaction) =>
-                      ((new Date(b.createdAt) as any) -
-                        new Date(a.createdAt)) as any
+                      (new Date(b.createdAt) as any) -
+                      (new Date(a.createdAt) as any)
                   )
                   .slice(0, 5)}
                 symbols={symbols}
@@ -584,7 +584,8 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
     for (let transaction of walletTransactions
       .sort(
         (a: Transaction, b: Transaction) =>
-          ((new Date(b.createdAt) as any) - new Date(a.createdAt)) as any
+          (new Date(b.createdAt) as any) -
+          (new Date(a.createdAt) as any)
       )
       .slice(0, 5)) {
       let symbol = {
@@ -624,7 +625,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
         const assetCoin: CryptoCoin = await getCoinByName(token, asset.name);
         const currentTime = new Date();
         const coinLastUpdateTime = new Date(assetCoin.updatedAt);
-        const timeDifference = currentTime - coinLastUpdateTime;
+        const timeDifference = currentTime as any - (coinLastUpdateTime as any);
         const hoursDifference = timeDifference / (1000 * 60 * 60);
 
         if (hoursDifference > 1) {
@@ -660,7 +661,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
     });
     walletHistoryData = walletHistoryData.sort(
       (a: WalletHistory, b: WalletHistory) =>
-        ((new Date(a.createdAt) as any) - new Date(b.createdAt)) as any
+        new Date(a.createdAt) as any - (new Date(b.createdAt) as any)
     );
 
     // add new wallet history data
@@ -669,7 +670,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       walletHistoryData.length > 0
         ? new Date(walletHistoryData[walletHistoryData.length - 1].createdAt)
         : new Date();
-    const timeDifference = currentTime - lastAddedHistory;
+    const timeDifference = currentTime as any - (lastAddedHistory as any);
     const hoursDifference = timeDifference / (1000 * 60 * 60);
 
     if (hoursDifference > 3 || walletHistoryData.length === 0) {

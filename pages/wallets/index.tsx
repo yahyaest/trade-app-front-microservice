@@ -15,6 +15,10 @@ import AppConfig from "../../layout/AppConfig";
 import "primeflex/primeflex.css";
 import { formatCurrency } from "@/utils/utils";
 import { BreadCrumb } from "primereact/breadcrumb";
+import { addUserNotification } from "@/services/notification";
+import { User } from "@/models/user";
+import Cookies from "js-cookie";
+import { Notification } from "@/models/notification";
 
 const WalletsPage: Page = (props: any) => {
   const { error } = props;
@@ -38,7 +42,25 @@ const WalletsPage: Page = (props: any) => {
     });
   };
 
+  const createNotification = async (message: string, title: string) => {
+    const user: User = Cookies.get("user")
+      ? JSON.parse(Cookies.get("user") as string)
+      : null;
+    if (!user) return;
+    const notificationPayload: Notification = {
+      message,
+      sender: user.email,
+      title,
+      userId: user.id,
+      username: user.username,
+      userEmail: user.email,
+      userImage: (user.avatarUrl as string).split("/")[3],
+    };
+    return addUserNotification(notificationPayload);
+  };
+
   const handleCreateWalletButton = async () => {
+    await createNotification("User clicked on create wallet button", "Create Wallet");
     setIsModal(true);
   };
 

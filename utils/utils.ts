@@ -15,7 +15,7 @@ export const formatRelativeTime = (dateString: string | Date) => {
   const inputDate = new Date(dateString);
   const currentDate = new Date();
 
-  const timeDifference = currentDate - inputDate;
+  const timeDifference = (currentDate as any) - (inputDate as any);
   const secondsDifference = Math.floor(timeDifference / 1000);
   const minutesDifference = Math.floor(secondsDifference / 60);
   const hoursDifference = Math.floor(minutesDifference / 60);

@@ -194,9 +194,9 @@ export default function CoinChart(props: any) {
           ticks: {
             color: textColorSecondary,
             maxTicksLimit: 15,
-            callback: function (value: any, index: any) {
+            callback: function (this: any, value: any, index: any) {
               return setChartHorizentalData(this.getLabelForValue(value));
-            },
+            } as any,
           },
           grid: {
             color: surfaceBorder,

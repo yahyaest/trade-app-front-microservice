@@ -56,8 +56,8 @@ const TransactionsPage: Page = (props: any) => {
             <TransactionDataTable
               transactions={transactions.sort(
                 (a: Transaction, b: Transaction) =>
-                  ((new Date(b.createdAt) as any) -
-                    new Date(a.createdAt)) as any
+                  (new Date(b.createdAt) as any) -
+                  (new Date(a.createdAt) as any)
               )}
               symbols={symbols}
               displayHeader={true}
