@@ -1,17 +1,32 @@
+# Use an official Node.js runtime as a parent image
+FROM node:20-alpine AS builder
 
-FROM node:16-alpine
-
+# Set the working directory to /app
 WORKDIR /app
 
-COPY package.json ./
+# Copy package.json and package-lock.json to the container
+COPY package*.json ./
 
-RUN npm install
+# Install dependencies
+RUN npm ci --only=production
 
+# Copy the rest of the application code to the container
 COPY . .
 
-# Set the entrypoint script as executable
-RUN chmod +x /app/entrypoint.sh
+# Build the React app
+RUN npm run build
 
+# Use a lighter base image for the final stage
+FROM node:20-alpine
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy build artifacts from the previous stage
+COPY --from=builder /app .
+
+# Expose port 3000
 EXPOSE 3000
 
-CMD npm run dev
+# Start the app
+CMD ["npm", "start"]
