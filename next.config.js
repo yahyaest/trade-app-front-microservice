@@ -12,12 +12,15 @@ const {
 module.exports = (phase) => {
   if (phase === PHASE_DEVELOPMENT_SERVER) {
     return {
+      experimental: {
+        serverComponentsExternalPackages: ["pino", "pino-pretty"],
+      },
       reactStrictMode: true,
       images: {
         domains: [
           // "media.kitsu.io",
           "cdn.coinranking.com",
-          "172.26.0.4" // need to be fixed (eg: domain name in production , find alternative for development : fix docker network ip address ?)
+          "172.26.0.4", // need to be fixed (eg: domain name in production , find alternative for development : fix docker network ip address ?)
         ],
       },
       env: {
@@ -28,13 +31,16 @@ module.exports = (phase) => {
         CRYPTO_BASE_URL: process.env.CRYPTO_BASE_URL,
         WALLET_BASE_URL: process.env.WALLET_BASE_URL,
         NOTIFICATION_BASE_URL: process.env.NOTIFICATION_BASE_URL,
-        TASK_SCHEDULER_BASE: process.env.TASK_SCHEDULER_BASE
+        TASK_SCHEDULER_BASE: process.env.TASK_SCHEDULER_BASE,
       },
     };
   }
 
   // production
   return {
+    experimental: {
+      serverComponentsExternalPackages: ["pino", "pino-pretty"],
+    },
     reactStrictMode: true,
     images: {
       domains: [
@@ -49,7 +55,7 @@ module.exports = (phase) => {
       CRYPTO_BASE_URL: process.env.CRYPTO_BASE_URL,
       WALLET_BASE_URL: process.env.WALLET_BASE_URL,
       NOTIFICATION_BASE_URL: process.env.NOTIFICATION_BASE_URL,
-      TASK_SCHEDULER_BASE: process.env.TASK_SCHEDULER_BASE
+      TASK_SCHEDULER_BASE: process.env.TASK_SCHEDULER_BASE,
     },
   };
 };

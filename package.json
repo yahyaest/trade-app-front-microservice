@@ -21,6 +21,8 @@
     "eslint-config-next": "13.4.10",
     "js-cookie": "^3.0.5",
     "next": "13.4.10",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.2.2",
     "postcss": "8.4.26",
     "primeflex": "3.3.0",
     "primeicons": "^6.0.1",
