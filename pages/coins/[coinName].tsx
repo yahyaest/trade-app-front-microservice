@@ -2,23 +2,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
 import Cookies from "js-cookie";
-import { BreadCrumb } from "primereact/breadcrumb";
-import { ProgressSpinner } from "primereact/progressspinner";
-import { Toast } from "primereact/toast";
 import { Page } from "../../types/types";
 import AppConfig from "../../layout/AppConfig";
-import {
-  getCoin,
-  getCoinByName,
-  getCoinChartData,
-  getUserWallets,
-} from "@/services";
-import styles from "./coinDetails.module.css";
+import { CustomLogger } from "@/utils/logger";
+import { Wallet } from "@/models/wallet";
+import CryptoClient from "@/services/crypto";
+import { getUserWallets } from "@/services";
 import CoinChart from "@/components/coinChart";
 import CoinInfos from "@/components/coinInfos";
 import CoinHeader from "@/components/coinHeader";
 import { CryptoCoin } from "@/models/cryptoCoin";
-import { Wallet } from "@/models/wallet";
+import { BreadCrumb } from "primereact/breadcrumb";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { Toast } from "primereact/toast";
+import styles from "./coinDetails.module.css";
 
 const CoinDetailPage: Page = (props: any) => {
   const { coinChartData, initialVerticalData, initialHorizentalData, error } =
@@ -122,11 +119,13 @@ const CoinDetailPage: Page = (props: any) => {
 export const getServerSideProps: GetServerSideProps<{}> = async (
   context: any
 ) => {
+  const logger = new CustomLogger();
   try {
     const token = context.req.cookies["token"];
     const { coinName } = context.params;
 
     if (!token) {
+      logger.warn("No token was provided. Redirecting to login page");
       return {
         redirect: {
           destination: "/auth/login",
@@ -135,10 +134,17 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       };
     }
 
-    let coin: CryptoCoin = await getCoinByName(token, coinName);
-    coin = await getCoin(token, coin.id);
+    const cryptoClient = new CryptoClient();
+    logger.info(`Fetching coin data for ${coinName} ...`);
+    let coin: CryptoCoin = await cryptoClient.getCoinByName(token, coinName);
+    coin = await cryptoClient.getCoin(token, coin.id);
+    logger.info(`Updating coin ${coinName} with id ${coin.id} with latest price ${coin.price} $`);
 
-    const coinChartData = await getCoinChartData(token, coin.id, "1h");
+    const coinChartData = await cryptoClient.getCoinChartData(
+      token,
+      coin.id,
+      "1h"
+    );
 
     let initialVerticalData = [];
     let initialHorizentalData = [];
@@ -157,7 +163,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       },
     };
   } catch (error: any) {
-    console.log("error type  : ", error.message);
+    logger.error(`Error fetching coin data: ${error.message}`);
     return { props: { error: error.message } };
   }
 };

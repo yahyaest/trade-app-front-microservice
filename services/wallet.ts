@@ -1,5 +1,7 @@
 import axios from "axios";
-import { getTransactions } from "./crypto";
+import CryptoClient from "./crypto";
+
+const cryptoClient = new CryptoClient();
 
 export const getAssets = async (token: string, query: any) => {
   try {
@@ -50,7 +52,10 @@ export const getAssets = async (token: string, query: any) => {
           name: asset.name,
           symbol: asset.symbol,
         };
-        const assetTransactions = await getTransactions(token, query);
+        const assetTransactions = await cryptoClient.getTransactions(
+          token,
+          query
+        );
         asset.transactions = assetTransactions;
       }
       assets = assets.concat(walletAssets);
@@ -61,7 +66,7 @@ export const getAssets = async (token: string, query: any) => {
   }
 };
 
-export const getAssetsByQuery = async (token: string, query:any) => {
+export const getAssetsByQuery = async (token: string, query: any) => {
   try {
     let queryParams = "";
     if (query) {
@@ -111,11 +116,11 @@ export const getUserWallets = async (token: string) => {
     return wallets;
   } catch (error) {
     console.error("Error fetching wallets:", error);
-    throw new Error(`Error fetching wallets:", ${error}`)
+    throw new Error(`Error fetching wallets:", ${error}`);
   }
 };
 
-export const getWalletByName = async (token: string, walletName:string) => {
+export const getWalletByName = async (token: string, walletName: string) => {
   try {
     const walletBaseUrl = process.env.WALLET_BASE_URL;
     const walletsUrl = `${walletBaseUrl}/api/wallets/?name=${walletName}`;
@@ -137,7 +142,7 @@ export const getWalletByName = async (token: string, walletName:string) => {
   }
 };
 
-export const getWallet = async (token: string, id:number) => {
+export const getWallet = async (token: string, id: number) => {
   try {
     const walletBaseUrl = process.env.WALLET_BASE_URL;
     const walletsUrl = `${walletBaseUrl}/api/wallets/${id}`;
@@ -159,10 +164,7 @@ export const getWallet = async (token: string, id:number) => {
   }
 };
 
-export const addWallet = async (
-  token: string,
-  payload: any
-) => {
+export const addWallet = async (token: string, payload: any) => {
   try {
     const walletBaseUrl = process.env.WALLET_BASE_URL;
     const walletsUrl = `${walletBaseUrl}/api/wallets`;
@@ -184,7 +186,11 @@ export const addWallet = async (
   }
 };
 
-export const patchWallet = async (token: string, walletId: number, payload:any) => {
+export const patchWallet = async (
+  token: string,
+  walletId: number,
+  payload: any
+) => {
   try {
     const walletBaseUrl = process.env.WALLET_BASE_URL;
     const walletsUrl = `${walletBaseUrl}/api/wallets/${walletId}`;
@@ -198,7 +204,7 @@ export const patchWallet = async (token: string, walletId: number, payload:any) 
       },
     };
 
-    const walletRersponse = await axios.patch(walletsUrl,payload, options);
+    const walletRersponse = await axios.patch(walletsUrl, payload, options);
     const wallet = walletRersponse.data;
     return wallet;
   } catch (error) {
@@ -206,7 +212,7 @@ export const patchWallet = async (token: string, walletId: number, payload:any) 
   }
 };
 
-export const getWalletHistory = async (token: string, query:any) => {
+export const getWalletHistory = async (token: string, query: any) => {
   try {
     let queryParams = "";
     if (query) {
@@ -236,10 +242,7 @@ export const getWalletHistory = async (token: string, query:any) => {
   }
 };
 
-export const addWalletHistory = async (
-  token: string,
-  payload: any
-) => {
+export const addWalletHistory = async (token: string, payload: any) => {
   try {
     const walletBaseUrl = process.env.WALLET_BASE_URL;
     const walletHistoryUrl = `${walletBaseUrl}/api/histories`;
@@ -253,11 +256,14 @@ export const addWalletHistory = async (
       },
     };
 
-    const walletRersponse = await axios.post(walletHistoryUrl, payload, options);
+    const walletRersponse = await axios.post(
+      walletHistoryUrl,
+      payload,
+      options
+    );
     const wallet = walletRersponse.data;
     return wallet;
   } catch (error) {
     console.error("Error posting wallet history:", error);
   }
 };
-

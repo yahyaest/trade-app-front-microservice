@@ -2,13 +2,13 @@
 
 import React, { useRef } from "react";
 import { GetServerSideProps } from "next";
-import AppConfig from "../../../../layout/AppConfig";
 import { Page } from "../../../../types/types";
-import { getTransactions } from "@/services";
+import CryptoClient from "@/services/crypto";
+import TransactionDataTable from "@/components/transactionDataTable";
 import { Transaction } from "@/models/transaction";
+import AppConfig from "../../../../layout/AppConfig";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Toast } from "primereact/toast";
-import TransactionDataTable from "@/components/transactionDataTable";
 
 const TransactionsPage: Page = (props: any) => {
   const { symbols, walletName, error } = props;
@@ -82,6 +82,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
   context: any
 ) => {
   try {
+    const cryptoClient = new CryptoClient();
     const token = context.req.cookies["token"];
 
     if (!token) {
@@ -95,7 +96,10 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
 
     const wallet = context.params.walletName;
     const query = { coinImage: true, wallet };
-    const transactions: Transaction[] = await getTransactions(token, query);
+    const transactions: Transaction[] = await cryptoClient.getTransactions(
+      token,
+      query
+    );
 
     // Update transactions for table filters
 

@@ -1,205 +1,215 @@
 import axios from "axios";
+import { CustomLogger } from "@/utils/logger";
+class CryptoClient {
+  private baseUrl: string;
+  private logger;
 
-export const getTransactions = async (token: string, query: any = {}) => {
-  try {
-    let queryParams = "";
-    if (query) {
-      queryParams = "?";
-      for (let key of Object.keys(query)) {
-        queryParams = queryParams + `${key}=${query[key]}&`;
-      }
-      queryParams = queryParams.slice(0, -1);
-    }
+  constructor() {
+    this.baseUrl = process.env.BASE_URL || "";
+    this.logger = new CustomLogger();
+  }
 
-    const cryptoBaseUrl = process.env.CRYPTO_BASE_URL;
-    const transactionsUrl = `${cryptoBaseUrl}/api/transactions/${queryParams}`;
-
-    // Check URL validity
-    let urlValid = true;
+  async getTransactions(token: string, query: any = {}) {
     try {
-      const url = new URL(transactionsUrl);
-    } catch (e) {
-      urlValid = false;
-      console.error(e);
+      let queryParams = "";
+      if (query) {
+        queryParams = "?";
+        for (let key of Object.keys(query)) {
+          queryParams += `${key}=${query[key]}&`;
+        }
+        queryParams = queryParams.slice(0, -1);
+      }
+
+      const transactionsUrl = `${this.baseUrl}/trade-crypto/api/transactions/${queryParams}`;
+      // Check URL validity
+      let urlValid = true;
+      try {
+        const url = new URL(transactionsUrl);
+      } catch (e) {
+        urlValid = false;
+        this.logger.error(e);
+      }
+
+      if (!urlValid) {
+        throw new Error(`Invalid URL ${transactionsUrl}`);
+      }
+
+      if (!token) {
+        throw new Error(
+          "No token was provided. Failed to get transactions data"
+        );
+      }
+
+      const options: any = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const response = await axios.get(transactionsUrl, options);
+      const transactions = response.data;
+
+      return transactions;
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        this.logger.error(
+          `Error fetching transactions : ${error.response.data.message}`
+        );
+        throw new Error(
+          `Error fetching transactions data. ${error.response.data.message}`
+        );
+      } else {
+        this.logger.error(
+          `Error fetching transactions : ${error.response.data.message}`
+        );
+        throw new Error(`Error fetching transactions data. ${error}`);
+      }
     }
+  }
 
-    if (!urlValid) {
-      throw new Error(`Invalid URL ${transactionsUrl}`);
-    }
+  async postTransaction(token: string, payload: any = {}) {
+    try {
+      const transactionsUrl = `${this.baseUrl}/trade-crypto/api/transactions`;
 
-    if (!token) {
-      throw new Error("No token was provided. Failed to get transactions data");
-    }
+      if (!token) {
+        throw Error("No token was provided. Failed to get transaction data");
+      }
+      const options: any = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.post(transactionsUrl, payload, options);
+      const transaction = response.data;
 
-    const options: any = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    const response = await axios.get(transactionsUrl, options);
-    const transactions = response.data;
-
-    return transactions;
-  } catch (error: any) {
-
-    if (error.response?.data?.message) {
-      console.error(
-        "Error fetching transactions:",
-        error.response.data.message
+      return transaction;
+    } catch (error: any) {
+      this.logger.error(
+        `Error posting transaction : ${error.response.data.message}`
       );
-      throw new Error(
-        `Error fetching transactions data. ${error.response.data.message}`
+      throw Error(
+        `Error posting transaction data. ${error.response.data.message}`
       );
-    } else {
-      console.error("Error fetching transactions:", error);
-      throw new Error(`Error fetching transactions data. ${error}`);
     }
   }
-};
 
-export const postTransaction = async (token: string, payload: any = {}) => {
-  try {
-    const cryptoBaseUrl = process.env.CRYPTO_BASE_URL;
-    const transactionsUrl = `${cryptoBaseUrl}/api/transactions`;
+  async getCoins(token: string) {
+    try {
+      const coinsUrl = `${this.baseUrl}/trade-crypto/api/coins`;
 
-    if (!token) {
-      throw Error("No token was provided. Failed to get transaction data");
+      if (!token) {
+        throw Error("No token was provided. Failed to get coins data");
+      }
+      const options: any = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get(coinsUrl, options);
+      const coins = response.data;
+
+      return coins;
+    } catch (error) {
+      this.logger.error(`Error fetching coins : ${error}`);
+      throw Error(`Error fetching coins data. ${error}`);
     }
-    const options: any = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    const response = await axios.post(transactionsUrl, payload, options);
-    const transaction = response.data;
-
-    return transaction;
-  } catch (error: any) {
-    console.error("Error fetching transaction:", error.response.data.message);
-    throw Error(
-      `Error fetching transaction data. ${error.response.data.message}`
-    );
   }
-};
 
-export const getCoins = async (token: string) => {
-  try {
-    const cryptoBaseUrl = process.env.CRYPTO_BASE_URL;
-    const coinsUrl = `${cryptoBaseUrl}/api/coins`;
+  async getCoin(token: string, id: number) {
+    try {
+      const coinUrl = `${this.baseUrl}/trade-crypto/api/coins/${id}`;
 
-    if (!token) {
-      throw Error("No token was provided. Failed to get coins data");
+      if (!token) {
+        throw Error("No token was provided. Failed to get coin data");
+      }
+      const options: any = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get(coinUrl, options);
+      const coin = response.data;
+
+      return coin;
+    } catch (error: any) {
+      this.logger.error(`Error fetching coin : ${error.response.data.message}`);
+      throw Error(`Error fetching coin data. ${error.response.data.message}`);
     }
-    const options: any = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    const response = await axios.get(coinsUrl, options);
-    const coins = response.data;
-
-    return coins;
-  } catch (error) {
-    console.error("Error fetching coins:", error);
-    throw Error(`Error fetching coins data. ${error}`);
   }
-};
 
-export const getCoin = async (token: string, id: number) => {
-  try {
-    const cryptoBaseUrl = process.env.CRYPTO_BASE_URL;
-    const coinsUrl = `${cryptoBaseUrl}/api/coins/${id}`;
+  async getCoinByName(token: string, name: string) {
+    try {
+      const coinsUrl = `${this.baseUrl}/trade-crypto/api/coins/?name=${name}`;
 
-    if (!token) {
-      throw Error("No token was provided. Failed to get coin data");
+      if (!token) {
+        throw Error("No token was provided. Failed to get coin data");
+      }
+      const options: any = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get(coinsUrl, options);
+      const coin = response.data[0];
+
+      return coin;
+    } catch (error: any) {
+      this.logger.error(
+        `Error fetching coin data: ${error.response.data.message}`
+      );
+      throw Error(`Error fetching coin data: ${error.response.data.message}`);
     }
-    const options: any = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    const response = await axios.get(coinsUrl, options);
-    const coin = response.data;
-
-    return coin;
-  } catch (error: any) {
-    console.error("Error fetching coin:", error.response.data.message);
-    throw Error(`Error fetching coin data. ${error.response.data.message}`);
   }
-};
 
-export const getCoinByName = async (token: string, name: string) => {
-  try {
-    const cryptoBaseUrl = process.env.CRYPTO_BASE_URL;
-    const coinsUrl = `${cryptoBaseUrl}/api/coins/?name=${name}`;
+  async getCoinChartData(token: string, coinId: number, duration: string) {
+    try {
+      const coinsUrl = `${this.baseUrl}/trade-crypto/api/coins/${coinId}/history/?duration=${duration}`;
 
-    if (!token) {
-      throw Error("No token was provided. Failed to get coin data");
+      if (!token) {
+        throw Error("No token was provided. Failed to get coin data");
+      }
+      const options: any = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get(coinsUrl, options);
+      const chartData = response.data;
+
+      return chartData;
+    } catch (error: any) {
+      this.logger.error(
+        `Error fetching coin chart data: ${error.response.data.message}`
+      );
+      throw Error(
+        "Error fetching coin chart data. Please check your network connection"
+      );
     }
-    const options: any = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    const response = await axios.get(coinsUrl, options);
-    const coin = response.data[0];
-
-    return coin;
-  } catch (error: any) {
-    console.error("Error fetching coin:", error.response.data.message);
-    throw Error(`Error fetching coin data: ${error.response.data.message}`);
   }
-};
 
-export const getCoinChartData = async (
-  token: string,
-  coinId: number,
-  duration: string
-) => {
-  try {
-    const cryptoBaseUrl = process.env.CRYPTO_BASE_URL;
-    const coinsUrl = `${cryptoBaseUrl}/api/coins/${coinId}/history/?duration=${duration}`;
+  async getCoinsList(token: string) {
+    try {
+      const coinsUrl = `${this.baseUrl}/trade-crypto/api/coins/list`;
 
-    if (!token) {
-      throw Error("No token was provided. Failed to get coin data");
+      if (!token) {
+        throw Error("No token was provided. Failed to get coin data");
+      }
+      const options: any = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get(coinsUrl, options);
+      const coinsList = response.data;
+
+      return coinsList;
+    } catch (error: any) {
+      this.logger.error("Error fetching coins List:", error.response.data.message);
+      throw Error(
+        `Error fetching coins List data: ${error.response.data.message}`
+      );
     }
-    const options: any = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    const response = await axios.get(coinsUrl, options);
-    const chartData = response.data;
-
-    return chartData;
-  } catch (error) {
-    console.error("Error fetching coin chart data:", error);
-    throw Error(
-      "Error fetching coin chart data. Please check your network connection"
-    );
   }
-};
+}
 
-export const getCoinsList = async (token: string) => {
-  try {
-    const cryptoBaseUrl = process.env.CRYPTO_BASE_URL;
-    const coinsUrl = `${cryptoBaseUrl}/api/coins/list`;
-
-    if (!token) {
-      throw Error("No token was provided. Failed to get coin data");
-    }
-    const options: any = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    const response = await axios.get(coinsUrl, options);
-    const coinsList = response.data;
-
-    return coinsList;
-  } catch (error: any) {
-    console.error("Error fetching coins List:", error.response.data.message);
-    throw Error(`Error fetching coins List data: ${error.response.data.message}`);
-  }
-};
+export default CryptoClient;

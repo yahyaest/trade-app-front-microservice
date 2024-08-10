@@ -1,38 +1,37 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState, useRef } from "react";
 import { GetServerSideProps } from "next";
-import { Button } from "primereact/button";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { useRouter } from "next/router";
-import { Toast } from "primereact/toast";
+import { Page } from "../../../types/types";
+import CryptoClient from "@/services/crypto";
+import { CustomLogger } from "@/utils/logger";
 import {
   addWalletHistory,
   getAssets,
   getAssetsByQuery,
-  getCoin,
-  getCoinByName,
-  getTransactions,
   getWalletByName,
   getWalletHistory,
 } from "@/services";
 import { Wallet } from "@/models/wallet";
-import { Page } from "../../../types/types";
-import AppConfig from "../../../layout/AppConfig";
-import "primeflex/primeflex.css";
-import { BreadCrumb } from "primereact/breadcrumb";
-import { Avatar } from "primereact/avatar";
-import { AvatarGroup } from "primereact/avatargroup";
 import { Transaction } from "@/models/transaction";
 import { Asset } from "@/models/asset";
+import { CryptoCoin } from "@/models/cryptoCoin";
+import { WalletHistory } from "@/models/walletHistory";
+import AppConfig from "../../../layout/AppConfig";
 import AssetDataTable from "@/components/assetDataTable";
 import TransactionDataTable from "@/components/transactionDataTable";
 import PieChart from "@/components/pieChart";
-import { CryptoCoin } from "@/models/cryptoCoin";
-import { formatCurrency } from "@/utils/utils";
-import styles from "./walletDashboard.module.css";
-import { WalletHistory } from "@/models/walletHistory";
 import WalletHistoryChart from "@/components/walletHistoryChart";
+import { formatCurrency } from "@/utils/utils";
+import { BreadCrumb } from "primereact/breadcrumb";
+import { Avatar } from "primereact/avatar";
+import { AvatarGroup } from "primereact/avatargroup";
+import { Button } from "primereact/button";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
+import styles from "./walletDashboard.module.css";
+import "primeflex/primeflex.css";
 
 const WalletPage: Page = (props: any) => {
   const {
@@ -555,9 +554,11 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
   context: any
 ) => {
   try {
+    const logger = new CustomLogger();
     const token = context.req.cookies["token"];
     const user = context.req.cookies["user"];
     const username = JSON.parse(user).email;
+    const cryptoClient = new CryptoClient();
 
     if (!token) {
       return {
@@ -574,7 +575,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
 
     // get wallet transactions
     const transactionQuery = { coinImage: true, wallet: walletName };
-    let walletTransactions: Transaction[] = await getTransactions(
+    let walletTransactions: Transaction[] = await cryptoClient.getTransactions(
       token,
       transactionQuery
     );
@@ -584,8 +585,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
     for (let transaction of walletTransactions
       .sort(
         (a: Transaction, b: Transaction) =>
-          (new Date(b.createdAt) as any) -
-          (new Date(a.createdAt) as any)
+          (new Date(b.createdAt) as any) - (new Date(a.createdAt) as any)
       )
       .slice(0, 5)) {
       let symbol = {
@@ -607,6 +607,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
 
     // get wallet assets and calculate non sold assets values
     const assetQuery = { name: walletName };
+
     const walletAssets: Asset[] | undefined = await getAssets(
       token,
       assetQuery
@@ -622,14 +623,21 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
         });
 
         // Check if coin is updated in the last hour in order to minimize coinranking api usage
-        const assetCoin: CryptoCoin = await getCoinByName(token, asset.name);
+        const assetCoin: CryptoCoin = await cryptoClient.getCoinByName(
+          token,
+          asset.name
+        );
         const currentTime = new Date();
         const coinLastUpdateTime = new Date(assetCoin.updatedAt);
-        const timeDifference = currentTime as any - (coinLastUpdateTime as any);
+        const timeDifference =
+          (currentTime as any) - (coinLastUpdateTime as any);
         const hoursDifference = timeDifference / (1000 * 60 * 60);
 
         if (hoursDifference > 1) {
-          const currentCoin: CryptoCoin = await getCoin(token, assetCoin.id);
+          const currentCoin: CryptoCoin = await cryptoClient.getCoin(
+            token,
+            assetCoin.id
+          );
           nonSoldAssetsValue =
             nonSoldAssetsValue +
             (asset.boughtAmount - asset.soldAmount) * +currentCoin.price;
@@ -643,10 +651,8 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
 
     // get wallet transactions and assets by date
     const lastWeekTransactionQuery = { wallet: walletName, days: "7" };
-    const lastWeekWalletTransactions: Transaction[] = await getTransactions(
-      token,
-      lastWeekTransactionQuery
-    );
+    const lastWeekWalletTransactions: Transaction[] =
+      await cryptoClient.getTransactions(token, lastWeekTransactionQuery);
 
     const lastWeekAssetQuery = { walletName, days: "7" };
     const lastWeekWalletAssets: Asset[] = await getAssetsByQuery(
@@ -661,7 +667,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
     });
     walletHistoryData = walletHistoryData.sort(
       (a: WalletHistory, b: WalletHistory) =>
-        new Date(a.createdAt) as any - (new Date(b.createdAt) as any)
+        (new Date(a.createdAt) as any) - (new Date(b.createdAt) as any)
     );
 
     // add new wallet history data
@@ -670,7 +676,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       walletHistoryData.length > 0
         ? new Date(walletHistoryData[walletHistoryData.length - 1].createdAt)
         : new Date();
-    const timeDifference = currentTime as any - (lastAddedHistory as any);
+    const timeDifference = (currentTime as any) - (lastAddedHistory as any);
     const hoursDifference = timeDifference / (1000 * 60 * 60);
 
     if (hoursDifference > 3 || walletHistoryData.length === 0) {

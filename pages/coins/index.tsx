@@ -1,16 +1,17 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState, useRef } from "react";
 import { GetServerSideProps } from "next";
+import { useRouter } from "next/router";
+import { Page } from "../../types/types";
 import Cookies from "js-cookie";
+import AppConfig from "../../layout/AppConfig";
+import { CustomLogger } from "@/utils/logger";
+import CryptoClient from "@/services/crypto";
+import { CryptoCoin } from "@/models/cryptoCoin";
 import { Tag } from "primereact/tag";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
-import { Page } from "../../types/types";
-import AppConfig from "../../layout/AppConfig";
-import { getCoin, getCoins } from "@/services";
-import { useRouter } from "next/router";
 import { Toast } from "primereact/toast";
-import { CryptoCoin } from "@/models/cryptoCoin";
 import { BreadCrumb } from "primereact/breadcrumb";
 import styles from "./coins.module.css";
 
@@ -51,7 +52,9 @@ const CoinsPage: Page = (props: any) => {
   const updateCoin = async (id: number) => {
     try {
       const token = Cookies.get("token") as string;
-      const updatedCoin = await getCoin(token, id);
+      const cryptoClient = new CryptoClient();
+      const updatedCoin = await cryptoClient.getCoin(token, id);
+
       let coins: CryptoCoin[] = [...coinsList];
       let coinIndex = coins.findIndex((coin) => coin.id === id);
       coins[`${coinIndex}`] = updatedCoin;
@@ -172,7 +175,9 @@ const CoinsPage: Page = (props: any) => {
   return (
     <div className="surface-ground align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden text-center">
       <BreadCrumb model={items as any} home={home} className="my-3" />
-      <h1 className="font-bold text-3xl sm:text-6xl text-yellow-500">Top 100 Crypto Coins</h1>
+      <h1 className="font-bold text-3xl sm:text-6xl text-yellow-500">
+        Top 100 Crypto Coins
+      </h1>
       <Toast ref={toast} />
       <div className="flex flex-row flex-wrap align-items-center justify-content-center mx-3">
         {coinsList
@@ -195,10 +200,12 @@ const CoinsPage: Page = (props: any) => {
 export const getServerSideProps: GetServerSideProps<{}> = async (
   context: any
 ) => {
+  const logger = new CustomLogger();
   try {
     const token = context.req.cookies["token"];
 
     if (!token) {
+      logger.warn("No token was provided. Redirecting to login page");
       return {
         redirect: {
           destination: "/auth/login",
@@ -207,12 +214,16 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       };
     }
 
-    const coins: CryptoCoin[] = await getCoins(token);
+    const cryptoClient = new CryptoClient();
+    logger.info("Fetching coins data ...");
+    const coins: CryptoCoin[] = await cryptoClient.getCoins(token);
+    logger.info(`Successfully fetched ${coins.length} coins`);
 
     return {
       props: { coins, error: null },
     };
   } catch (error: any) {
+    logger.error(`Error fetching coins data: ${error.message}`);
     return {
       props: { error: error.message },
     };

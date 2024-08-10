@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
+import Cookies from "js-cookie";
+import CryptoClient from "@/services/crypto";
+import { CryptoCoin } from "@/models/cryptoCoin";
+import SpinnerModal from "./spinnerModal";
 import { Tag } from "primereact/tag";
 import { Chart } from "primereact/chart";
-import Cookies from "js-cookie";
-import { getCoinChartData } from "@/services";
-import SpinnerModal from "./spinnerModal";
-import { CryptoCoin } from "@/models/cryptoCoin";
 
 export default function CoinChart(props: any) {
   const { coinChartData, initialVerticalData, initialHorizentalData, styles } =
@@ -14,7 +14,7 @@ export default function CoinChart(props: any) {
   const [chartData, setChartData] = useState({});
   const [chartOptions, setChartOptions] = useState({});
   const [chartType, setChartType] = useState<string>("line");
-  const [currentVerticalData, setCurrentVerticalData] =
+  const [currentVerticalData, setCurrentVerticalData] = 
     useState<any[]>(initialVerticalData);
   const [currentHorizentalData, setCurrentHorizentalData] = useState<any[]>(
     initialHorizentalData
@@ -63,7 +63,7 @@ export default function CoinChart(props: any) {
         const prevElement = document.querySelector(
           `.${selectedDurationClassName}`
         ) as any;
-        prevElement.style.backgroundColor = "";; // Remove background color
+        prevElement.style.backgroundColor = ""; // Remove background color
       }
       setSelectedDurationClassName(className);
     } else {
@@ -71,7 +71,7 @@ export default function CoinChart(props: any) {
         const prevElement = document.querySelector(
           `.${selectedChartTypeClassName}`
         ) as any;
-        prevElement.style.backgroundColor = "";; // Remove background color
+        prevElement.style.backgroundColor = ""; // Remove background color
       }
       setSelectedChartTypeClassName(className);
     }
@@ -120,7 +120,12 @@ export default function CoinChart(props: any) {
   const updateChartData = async (period: string) => {
     try {
       const token = Cookies.get("token") as string;
-      const coinChartData = await getCoinChartData(token, coin.id, period);
+      const cryptoClient = new CryptoClient();
+      const coinChartData = await cryptoClient.getCoinChartData(
+        token,
+        coin.id,
+        period
+      );
 
       let verticalData = [];
       let horizentalData = [];
