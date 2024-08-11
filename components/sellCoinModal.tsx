@@ -1,25 +1,22 @@
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import Cookies from "js-cookie";
+import { formatCurrency } from "@/utils/utils";
+import CryptoClient from "@/services/crypto";
+import WalletClient from "@/services/wallet";
+import { Asset } from "@/models/asset";
+import { CryptoCoin } from "@/models/cryptoCoin";
+import { Wallet } from "@/models/wallet";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { Slider } from "primereact/slider";
-import { formatCurrency } from "@/utils/utils";
-import {
-  getCoin,
-  getCoinByName,
-  getWallet,
-  patchWallet,
-  postTransaction,
-} from "@/services";
-import Cookies from "js-cookie";
-import { useRouter } from "next/router";
-import { Asset } from "@/models/asset";
-import { CryptoCoin } from "@/models/cryptoCoin";
-import { Wallet } from "@/models/wallet";
 import { ProgressSpinner } from "primereact/progressspinner";
 
 export default function SellCoinModal(props: any) {
+  const cryptoClient = new CryptoClient();
+  const walletClient = new WalletClient();
   const { visible, setVisible, toast } = props;
   const data: Asset = props.data;
   const [currentCoin, setCurrentCoin] = useState<CryptoCoin>({} as CryptoCoin);
@@ -36,9 +33,9 @@ export default function SellCoinModal(props: any) {
     async function fetchData() {
       try {
         const token = Cookies.get("token") as string;
-        let currentCoin = await getCoinByName(token, data.name);
-        currentCoin = await getCoin(token, currentCoin.id);
-        const targetWallet = await getWallet(token, data.walletId);
+        let currentCoin = await cryptoClient.getCoinByName(token, data.name);
+        currentCoin = await cryptoClient.getCoin(token, currentCoin.id);
+        const targetWallet = await walletClient.getWallet(token, data.walletId);
         setCurrentCoin(currentCoin);
         setTargetWallet(targetWallet);
         setValue(
@@ -119,13 +116,13 @@ export default function SellCoinModal(props: any) {
         unit_price: currentCoin.price,
         value: `${+currentCoin.price * amount}`,
       };
-      await postTransaction(token, transactionPayload);
+      await cryptoClient.postTransaction(token, transactionPayload);
       const walletPayload = {
         currentValue: `${
           +targetWallet.currentValue + +currentCoin.price * amount
         }`,
       };
-      await patchWallet(token, targetWallet.id, walletPayload);
+      await walletClient.patchWallet(token, targetWallet.id, walletPayload);
       await sellCoinsToast();
       router.reload();
     } catch (error: any) {

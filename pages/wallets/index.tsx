@@ -1,24 +1,25 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState, useRef } from "react";
 import { GetServerSideProps } from "next";
+import { useRouter } from "next/router";
+import Cookies from "js-cookie";
+import { Page } from "../../types/types";
+import { CustomLogger } from "@/utils/logger";
+import { formatCurrency } from "@/utils/utils";
+import AppConfig from "../../layout/AppConfig";
+import WalletClient from "@/services/wallet";
+import { addUserNotification } from "@/services/notification";
+import AddWalletModal from "@/components/addWalletModal";
+import { User } from "@/models/user";
+import { Wallet } from "@/models/wallet";
+import { Notification } from "@/models/notification";
+import "primeflex/primeflex.css";
+import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
-import { useRouter } from "next/router";
 import { Toast } from "primereact/toast";
 import { DataView } from "primereact/dataview";
-import { getUserWallets } from "@/services";
-import { Wallet } from "@/models/wallet";
 import { Tag } from "primereact/tag";
-import AddWalletModal from "@/components/addWalletModal";
-import { Page } from "../../types/types";
-import AppConfig from "../../layout/AppConfig";
-import "primeflex/primeflex.css";
-import { formatCurrency } from "@/utils/utils";
-import { BreadCrumb } from "primereact/breadcrumb";
-import { addUserNotification } from "@/services/notification";
-import { User } from "@/models/user";
-import Cookies from "js-cookie";
-import { Notification } from "@/models/notification";
 
 const WalletsPage: Page = (props: any) => {
   const { error } = props;
@@ -60,7 +61,10 @@ const WalletsPage: Page = (props: any) => {
   };
 
   const handleCreateWalletButton = async () => {
-    await createNotification("User clicked on create wallet button", "Create Wallet");
+    await createNotification(
+      "User clicked on create wallet button",
+      "Create Wallet"
+    );
     setIsModal(true);
   };
 
@@ -92,7 +96,9 @@ const WalletsPage: Page = (props: any) => {
           />
           <div className="flex flex-column sm:flex-row justify-content-between align-items-center xl:align-items-start flex-1 gap-4">
             <div className="flex flex-column align-items-center sm:align-items-start gap-3">
-              <div className="text-2xl font-bold text-pink-600">{wallet.name}</div>
+              <div className="text-2xl font-bold text-pink-600">
+                {wallet.name}
+              </div>
               <p>{wallet.createdAt.split("T")[0]}</p>
               <div className="flex align-items-center gap-3">
                 <span className="flex align-items-center gap-2">
@@ -112,7 +118,7 @@ const WalletsPage: Page = (props: any) => {
                 {formatCurrency(wallet.currentValue)}
               </span>
               <Button
-              className= "mt-3"
+                className="mt-3"
                 label="Wallet Dashboard"
                 size="small"
                 icon="pi pi-wallet"
@@ -190,10 +196,13 @@ const WalletsPage: Page = (props: any) => {
 export const getServerSideProps: GetServerSideProps<{}> = async (
   context: any
 ) => {
+  const logger = new CustomLogger();
   try {
+    const walletClient = new WalletClient();
     const token = context.req.cookies["token"];
 
     if (!token) {
+      logger.warn("No token was provided. Redirecting to login page");
       return {
         redirect: {
           destination: "/auth/login",
@@ -202,12 +211,16 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       };
     }
 
-    const wallets: Wallet[] = await getUserWallets(token);
+    logger.info("Fetching user wallets...");
+    const wallets: Wallet[] = await walletClient.getUserWallets(token);
+    logger.info(`Successfully fetched ${wallets.length} wallets`);
+    logger.info(`Fetched wallets: ${JSON.stringify(wallets)}`);
 
     return {
       props: { wallets, error: null },
     };
   } catch (error: any) {
+    logger.error(`Error fetching coins data: ${error.message}`);
     return {
       props: { error: error.message },
     };

@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import WalletClient from "@/services/wallet";
+import { Wallet } from "@/models/wallet";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
-import { addWallet } from "@/services";
-import { Wallet } from "@/models/wallet";
 
 export default function AddWalletModal(props: any) {
+  const walletClient = new WalletClient();
   const { visible, setVisible, toast } = props;
   const wallets: Wallet[] = props.wallets;
   const [username, setUsername] = useState<string>("");
@@ -51,11 +52,11 @@ export default function AddWalletModal(props: any) {
         intialValue: `${walletValue}`,
         currentValue: `${walletValue}`,
       };
-      await addWallet(token, payload);
-      addWalletToast()
-    } catch (error : any) {
-      console.log(error.message)
-      addWalletErrorToast(error.message)
+      await walletClient.addWallet(token, payload);
+      addWalletToast();
+    } catch (error: any) {
+      console.log(error.message);
+      addWalletErrorToast(error.message);
     }
   };
 
@@ -121,10 +122,10 @@ export default function AddWalletModal(props: any) {
             </p>
           </div>
         )}
-        {(walletType === "STOCK" || walletType  === "FOREX") && (
+        {(walletType === "STOCK" || walletType === "FOREX") && (
           <div
-          className="mt-2 mb-4 text-center"
-          style={{ backgroundColor: "tomato", borderRadius: "10px" }}
+            className="mt-2 mb-4 text-center"
+            style={{ backgroundColor: "tomato", borderRadius: "10px" }}
           >
             <p className="p-2 text-white">
               <strong>

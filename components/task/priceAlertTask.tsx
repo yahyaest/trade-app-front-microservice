@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { getCoin, getCoinByName, getCoinsList } from "@/services/crypto";
+import CryptoClient from "@/services/crypto";
 import { CryptoCoin } from "@/models/cryptoCoin";
 import { User } from "@/models/user";
 import { Dropdown } from "primereact/dropdown";
@@ -10,6 +10,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { RadioButton } from "primereact/radiobutton";
 
 const PriceAlertTask = (props: any) => {
+  const cryptoClient = new CryptoClient();
   const { taskArgs, setTaskArgs, setIsSubmit, handleMainSubmitState } = props;
   const [coinsList, setCoinsList] = useState<string[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<CryptoCoin | null>(null);
@@ -28,7 +29,7 @@ const PriceAlertTask = (props: any) => {
     : null;
 
   const setTaskTypeData = async () => {
-    const coinsList = await getCoinsList(token);
+    const coinsList = await cryptoClient.getCoinsList(token);
     setCoinsList(coinsList);
   };
 
@@ -54,9 +55,12 @@ const PriceAlertTask = (props: any) => {
 
   const onCoinChange = async (e: any) => {
     setLoading(true);
-    const coin: CryptoCoin = await getCoinByName(token, e.value.name);
+    const coin: CryptoCoin = await cryptoClient.getCoinByName(
+      token,
+      e.value.name
+    );
     const oldCoinPrice = +coin.price;
-    const currentCoin: CryptoCoin = await getCoin(token, coin.id);
+    const currentCoin: CryptoCoin = await cryptoClient.getCoin(token, coin.id);
     const newCoinPrice = +currentCoin.price;
     const priceMargin = (
       ((newCoinPrice - oldCoinPrice) / oldCoinPrice) *

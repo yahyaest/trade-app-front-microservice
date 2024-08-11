@@ -1,4 +1,10 @@
 import React, { useState, useRef } from "react";
+import Cookies from "js-cookie";
+import { formatCurrency } from "@/utils/utils";
+import CryptoClient from "@/services/crypto";
+import WalletClient from "@/services/wallet";
+import { Wallet } from "@/models/wallet";
+import { CryptoCoin } from "@/models/cryptoCoin";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -6,13 +12,10 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { Slider } from "primereact/slider";
 import { Toast } from "primereact/toast";
-import { formatCurrency } from "@/utils/utils";
-import { Wallet } from "@/models/wallet";
-import { CryptoCoin } from "@/models/cryptoCoin";
-import Cookies from "js-cookie";
-import { patchWallet, postTransaction } from "@/services";
 
 export default function BuyCoinModal(props: any) {
+  const cryptoClient = new CryptoClient();
+  const walletClient = new WalletClient();
   const { visible, setVisible, toast } = props;
   const wallets: Wallet[] = props.wallets;
   const coin: CryptoCoin = props.coin;
@@ -20,7 +23,6 @@ export default function BuyCoinModal(props: any) {
   const [amount, setAmount] = useState<number>(0);
   const [value, setValue] = useState<string>("0");
   const [sliderValue, setSliderValue] = useState<number>(100);
-
 
   const buyCoinsToast = (coinName: string, amount: number) => {
     toast.current?.show({
@@ -54,11 +56,11 @@ export default function BuyCoinModal(props: any) {
         unit_price: coin.price,
         value: `${+coin.price * amount}`,
       };
-      await postTransaction(token, transactionPayload);
+      await cryptoClient.postTransaction(token, transactionPayload);
       const walletPayload = {
         currentValue: `${+wallet.currentValue - +coin.price * amount}`,
       };
-      await patchWallet(token, wallet.id, walletPayload);
+      await walletClient.patchWallet(token, wallet.id, walletPayload);
       buyCoinsToast(coin.name, amount);
     } catch (error: any) {
       console.log(error.message);

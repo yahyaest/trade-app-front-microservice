@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import WalletClient from "@/services/wallet";
 import { User } from "@/models/user";
 import { Wallet } from "@/models/wallet";
-import { getUserWallets } from "@/services";
 import { Dropdown } from "primereact/dropdown";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Checkbox } from "primereact/checkbox";
 import { Tag } from "primereact/tag";
 
 const WalletHistoryTask = (props: any) => {
+  const walletClient = new WalletClient();
   const { taskArgs, setTaskArgs, setIsSubmit, handleMainSubmitState } = props;
   const [walletList, setWalletList] = useState<string[]>([]);
   const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
@@ -22,7 +23,7 @@ const WalletHistoryTask = (props: any) => {
     : null;
 
   const setTaskTypeData = async () => {
-    const walletList = await getUserWallets(token);
+    const walletList = await walletClient.getUserWallets(token);
     setWalletList(walletList);
   };
 

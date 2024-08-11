@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import Cookies from "js-cookie";
-import { getCoin, getCoinByName, getCoinsList } from "@/services/crypto";
-import { getUserWallets } from "@/services/wallet";
+import CryptoClient from "@/services/crypto";
+import WalletClient from "@/services/wallet";
 import { CryptoCoin } from "@/models/cryptoCoin";
 import { User } from "@/models/user";
 import { Wallet } from "@/models/wallet";
@@ -13,7 +13,15 @@ import { Tag } from "primereact/tag";
 import { Messages } from "primereact/messages";
 
 const PlaceOrderTask = (props: any) => {
-  const { taskArgs, setTaskArgs, isTaskPeriodic, setIsSubmit, handleMainSubmitState } = props;
+  const cryptoClient = new CryptoClient();
+  const walletClient = new WalletClient();
+  const {
+    taskArgs,
+    setTaskArgs,
+    isTaskPeriodic,
+    setIsSubmit,
+    handleMainSubmitState,
+  } = props;
   const msgs = useRef<Messages>(null);
   const [coinsList, setCoinsList] = useState<string[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<CryptoCoin | null>(null);
@@ -34,9 +42,9 @@ const PlaceOrderTask = (props: any) => {
     : null;
 
   const setTaskTypeData = async () => {
-    const coinsList = await getCoinsList(token);
+    const coinsList = await cryptoClient.getCoinsList(token);
     setCoinsList(coinsList);
-    const walletList: Wallet[] | any = await getUserWallets(token);
+    const walletList: Wallet[] | any = await walletClient.getUserWallets(token);
     setWalletList(
       walletList.filter((wallet: Wallet) => wallet.type === "CRYPTO")
     );
@@ -85,9 +93,12 @@ const PlaceOrderTask = (props: any) => {
 
   const onCoinChange = async (e: any) => {
     setLoading(true);
-    const coin: CryptoCoin = await getCoinByName(token, e.value.name);
+    const coin: CryptoCoin = await cryptoClient.getCoinByName(
+      token,
+      e.value.name
+    );
     const oldCoinPrice = +coin.price;
-    const currentCoin: CryptoCoin = await getCoin(token, coin.id);
+    const currentCoin: CryptoCoin = await cryptoClient.getCoin(token, coin.id);
     const newCoinPrice = +currentCoin.price;
     const priceMargin = (
       ((newCoinPrice - oldCoinPrice) / oldCoinPrice) *

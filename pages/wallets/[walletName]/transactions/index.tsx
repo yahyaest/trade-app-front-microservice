@@ -3,10 +3,11 @@
 import React, { useRef } from "react";
 import { GetServerSideProps } from "next";
 import { Page } from "../../../../types/types";
+import AppConfig from "../../../../layout/AppConfig";
+import { CustomLogger } from "@/utils/logger";
 import CryptoClient from "@/services/crypto";
 import TransactionDataTable from "@/components/transactionDataTable";
 import { Transaction } from "@/models/transaction";
-import AppConfig from "../../../../layout/AppConfig";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Toast } from "primereact/toast";
 
@@ -81,11 +82,13 @@ const TransactionsPage: Page = (props: any) => {
 export const getServerSideProps: GetServerSideProps<{}> = async (
   context: any
 ) => {
+  const logger = new CustomLogger();
   try {
     const cryptoClient = new CryptoClient();
     const token = context.req.cookies["token"];
 
     if (!token) {
+      logger.warn("No token was provided. Redirecting to login page");
       return {
         redirect: {
           destination: "/auth/login",
@@ -96,12 +99,17 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
 
     const wallet = context.params.walletName;
     const query = { coinImage: true, wallet };
+    logger.info(`Fetching transactions for wallet ${wallet}...`);
     const transactions: Transaction[] = await cryptoClient.getTransactions(
       token,
       query
     );
+    logger.info(
+      `Successfully fetched ${transactions.length} transactions for wallet ${wallet}`
+    );
 
     // Update transactions for table filters
+    logger.info("Updating transactions for table filters...");
 
     let symbols = [];
 
@@ -127,7 +135,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       props: { transactions, symbols, walletName: wallet, error: null },
     };
   } catch (error: any) {
-    console.log("error type  : ", error.message);
+    logger.error(`Error fetching coins data: ${error.message}`);
     return { props: { error: error.message } };
   }
 };

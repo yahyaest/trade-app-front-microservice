@@ -5,12 +5,13 @@ import { GetServerSideProps } from "next";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Page } from "../../../../types/types";
 import AppConfig from "../../../../layout/AppConfig";
-import { getAssets } from "@/services";
-import { Toast } from "primereact/toast";
+import { CustomLogger } from "@/utils/logger";
+import WalletClient from "@/services/wallet";
+import AssetDataTable from "@/components/assetDataTable";
 import SellCoinModal from "@/components/sellCoinModal";
 import { Asset } from "@/models/asset";
+import { Toast } from "primereact/toast";
 import { BreadCrumb } from "primereact/breadcrumb";
-import AssetDataTable from "@/components/assetDataTable";
 
 const AssetsPage: Page = (props: any) => {
   const { walletName, error } = props;
@@ -108,10 +109,13 @@ const AssetsPage: Page = (props: any) => {
 export const getServerSideProps: GetServerSideProps<{}> = async (
   context: any
 ) => {
+  const logger = new CustomLogger();
   try {
+    const walletClient = new WalletClient();
     const token = context.req.cookies["token"];
 
     if (!token) {
+      logger.warn("No token was provided. Redirecting to login page");
       return {
         redirect: {
           destination: "/auth/login",
@@ -122,12 +126,21 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
 
     const walletName = context.params.walletName;
     const query = { name: walletName };
-    const assets: Asset[] | undefined = await getAssets(token, query);
-
+    logger.info(`Fetching assets for wallet ${walletName}...`);
+    const assets: Asset[] | undefined = await walletClient.getAssets(
+      token,
+      query
+    );
+    if (assets) {
+      logger.info(
+        `Successfully fetched ${assets.length} assets for wallet ${walletName}`
+      );
+    }
     return {
       props: { assets, walletName, error: null },
     };
   } catch (error: any) {
+    logger.error(`Error fetching coins data: ${error.message}`);
     console.log("error type  : ", error.message);
     return { props: { error: error.message } };
   }

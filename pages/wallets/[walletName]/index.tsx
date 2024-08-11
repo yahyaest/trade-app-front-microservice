@@ -3,26 +3,20 @@ import React, { useEffect, useState, useRef } from "react";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import { Page } from "../../../types/types";
-import CryptoClient from "@/services/crypto";
+import AppConfig from "../../../layout/AppConfig";
+import { formatCurrency } from "@/utils/utils";
 import { CustomLogger } from "@/utils/logger";
-import {
-  addWalletHistory,
-  getAssets,
-  getAssetsByQuery,
-  getWalletByName,
-  getWalletHistory,
-} from "@/services";
+import WalletClient from "@/services/wallet";
+import CryptoClient from "@/services/crypto";
 import { Wallet } from "@/models/wallet";
 import { Transaction } from "@/models/transaction";
 import { Asset } from "@/models/asset";
 import { CryptoCoin } from "@/models/cryptoCoin";
 import { WalletHistory } from "@/models/walletHistory";
-import AppConfig from "../../../layout/AppConfig";
 import AssetDataTable from "@/components/assetDataTable";
 import TransactionDataTable from "@/components/transactionDataTable";
 import PieChart from "@/components/pieChart";
 import WalletHistoryChart from "@/components/walletHistoryChart";
-import { formatCurrency } from "@/utils/utils";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Avatar } from "primereact/avatar";
 import { AvatarGroup } from "primereact/avatargroup";
@@ -553,14 +547,17 @@ const WalletPage: Page = (props: any) => {
 export const getServerSideProps: GetServerSideProps<{}> = async (
   context: any
 ) => {
+  const logger = new CustomLogger();
   try {
     const logger = new CustomLogger();
     const token = context.req.cookies["token"];
     const user = context.req.cookies["user"];
     const username = JSON.parse(user).email;
+    const walletClient = new WalletClient();
     const cryptoClient = new CryptoClient();
 
     if (!token) {
+      logger.warn("No token was provided. Redirecting to login page");
       return {
         redirect: {
           destination: "/auth/login",
@@ -571,10 +568,22 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
 
     // get user wallet
     const walletName = context.params.walletName;
-    const wallet: Wallet = await getWalletByName(token, walletName);
+    logger.info(`Preparing dashboard data for wallet ${walletName}...`);
+    logger.info(`Fetching wallet ${walletName}...`);
+    const wallet: Wallet = await walletClient.getWalletByName(
+      token,
+      walletName
+    );
+
+    if (wallet) {
+      logger.info(
+        `Successfully fetched wallet ${walletName} : ${JSON.stringify(wallet)}`
+      );
+    }
 
     // get wallet transactions
     const transactionQuery = { coinImage: true, wallet: walletName };
+    logger.info(`Fetching transactions for wallet ${walletName}...`);
     let walletTransactions: Transaction[] = await cryptoClient.getTransactions(
       token,
       transactionQuery
@@ -605,13 +614,26 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       delete transaction.value;
     }
 
+    if (walletTransactions) {
+      logger.info(
+        `Successfully fetched ${walletTransactions.length} transactions for wallet ${walletName}`
+      );
+    }
+
     // get wallet assets and calculate non sold assets values
     const assetQuery = { name: walletName };
 
-    const walletAssets: Asset[] | undefined = await getAssets(
+    logger.info(`Fetching assets for wallet ${walletName}...`);
+    const walletAssets: Asset[] | undefined = await walletClient.getAssets(
       token,
       assetQuery
     );
+
+    if (walletAssets) {
+      logger.info(
+        `Successfully fetched ${walletAssets.length} assets for wallet ${walletName}`
+      );
+    }
 
     let walletCoinList = [];
     let nonSoldAssetsValue = 0;
@@ -627,6 +649,11 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
           token,
           asset.name
         );
+        logger.info(
+          `Adding ${asset.boughtAmount - asset.soldAmount} ${
+            asset.name
+          } coins with unit price ${assetCoin.price} to wallet coin list...`
+        );
         const currentTime = new Date();
         const coinLastUpdateTime = new Date(assetCoin.updatedAt);
         const timeDifference =
@@ -638,6 +665,11 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
             token,
             assetCoin.id
           );
+          logger.info(
+            `Successfully fetched ${
+              assetCoin.name
+            } coin data : ${JSON.stringify(currentCoin)}`
+          );
           nonSoldAssetsValue =
             nonSoldAssetsValue +
             (asset.boughtAmount - asset.soldAmount) * +currentCoin.price;
@@ -648,26 +680,41 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
         }
       }
     }
+    logger.info(`Non sold assets value: ${nonSoldAssetsValue}`);
 
     // get wallet transactions and assets by date
     const lastWeekTransactionQuery = { wallet: walletName, days: "7" };
+    logger.info(`Fetching last week transactions for wallet ${walletName}...`);
     const lastWeekWalletTransactions: Transaction[] =
       await cryptoClient.getTransactions(token, lastWeekTransactionQuery);
 
+    logger.info(
+      `Found ${lastWeekWalletTransactions.length} transactions for wallet ${walletName} in the last week`
+    );
+    logger.info(`Fetching last week assets for wallet ${walletName}...`);
     const lastWeekAssetQuery = { walletName, days: "7" };
-    const lastWeekWalletAssets: Asset[] = await getAssetsByQuery(
+    const lastWeekWalletAssets: Asset[] = await walletClient.getAssetsByQuery(
       token,
       lastWeekAssetQuery
     );
+    logger.info(
+      `Found ${lastWeekWalletAssets.length} assets for wallet ${walletName} in the last week`
+    );
 
     // get wallet history data
-    let walletHistoryData: WalletHistory[] = await getWalletHistory(token, {
-      walletName: wallet.name,
-      username,
-    });
+    logger.info(`Fetching wallet history data for wallet ${walletName}...`);
+    let walletHistoryData: WalletHistory[] =
+      await walletClient.getWalletHistory(token, {
+        walletName: wallet.name,
+        username,
+      });
     walletHistoryData = walletHistoryData.sort(
       (a: WalletHistory, b: WalletHistory) =>
         (new Date(a.createdAt) as any) - (new Date(b.createdAt) as any)
+    );
+
+    logger.info(
+      `Found ${walletHistoryData.length} history data point for wallet ${walletName}`
     );
 
     // add new wallet history data
@@ -698,7 +745,16 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
         marginAmount,
       };
 
-      await addWalletHistory(token, payload);
+      logger.info(
+        `Adding new wallet history data point for wallet ${walletName} with payload: ${JSON.stringify(
+          payload
+        )}`
+      );
+
+      await walletClient.addWalletHistory(token, payload);
+      logger.info(
+        `Successfully added new wallet history data point for wallet ${walletName}`
+      );
     }
 
     // set wallet chart data
@@ -732,6 +788,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       },
     };
   } catch (error: any) {
+    logger.error(`Error fetching coins data: ${error.message}`);
     return {
       props: { error: error.message },
     };
