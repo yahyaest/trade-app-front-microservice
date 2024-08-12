@@ -1,9 +1,8 @@
 import { createContext, useState, useEffect } from "react";
 // import { getSession } from "next-auth/client";
 import Cookies from "js-cookie";
-import { getCurrentUser, getCurrentUserAvatar, logout } from "../services/gateway";
+import GatewayClient from "@/services/gateway";
 import { User } from "@/models/user";
-
 
 const UserContext = createContext({
   token: null,
@@ -15,6 +14,7 @@ const UserContext = createContext({
 });
 
 export function UserContextProvider(props: any) {
+  const gatewayClient = new GatewayClient();
   const [currentUser, setCurrentUser] = useState<User | null>();
   const [currentAvatar, setCurrentAvatar] = useState<string>();
   const [currentToken, setCurrentToken] = useState<string | null>();
@@ -22,14 +22,14 @@ export function UserContextProvider(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-        const token = Cookies.get("token");
-        if (token) {
-          setCurrentToken(token);
-          const user = await getCurrentUser();
-          const avatar = await getCurrentUserAvatar();
-          setCurrentUser(user);
-          if(avatar) setCurrentAvatar(avatar)
-        }
+      const token = Cookies.get("token");
+      if (token) {
+        setCurrentToken(token);
+        const user = await gatewayClient.getCurrentUser();
+        const avatar = await gatewayClient.getCurrentUserAvatar();
+        setCurrentUser(user);
+        if (avatar) setCurrentAvatar(avatar);
+      }
       // const session = await getSession();
       // if (session) {
       //   let user = await axios.get("/api/users/me");
@@ -41,16 +41,16 @@ export function UserContextProvider(props: any) {
     fetchData();
   }, []);
 
-  const logoutHandler = async() => {
-    await logout()
-    setCurrentToken(null)
+  const logoutHandler = async () => {
+    await gatewayClient.logout();
+    setCurrentToken(null);
     setCurrentUser(null);
-  }
+  };
 
   const context = {
     user: currentUser,
     avatar: currentAvatar,
-    logout: logoutHandler
+    logout: logoutHandler,
   };
 
   return (

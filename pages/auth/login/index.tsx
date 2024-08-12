@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
 import { Page } from "../../../types/types";
 import AppConfig from "../../../layout/AppConfig";
 import { LayoutContext } from "../../../layout/context/layoutcontext";
-import { login, getCurrentUser, getCurrentUserAvatar } from "@/services";
+import GatewayClient from "@/services/gateway";
 import { User } from "@/models/user";
 import { Checkbox } from "primereact/checkbox";
 import { Button } from "primereact/button";
@@ -17,6 +17,7 @@ import { classNames } from "primereact/utils";
 import { Toast } from "primereact/toast";
 
 const LoginPage: Page = () => {
+  const gatewayClient = new GatewayClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [checked, setChecked] = useState(false);
@@ -33,15 +34,18 @@ const LoginPage: Page = () => {
   const loginToast = (state: boolean): Promise<void> => {
     return new Promise((resolve) => {
       toast.current?.show({
-        severity:state ? "success" : "error",
+        severity: state ? "success" : "error",
         summary: state ? "Login Success" : "Login Failed",
         detail: state ? "You have successfully logged in" : "Wrong Credential",
         life: state ? 1500 : 3000,
       });
       // Resolve the promise after the duration of the toast
-      setTimeout(() => {
-        resolve();
-      }, state ? 1500 : 3000);
+      setTimeout(
+        () => {
+          resolve();
+        },
+        state ? 1500 : 3000
+      );
     });
   };
 
@@ -56,12 +60,12 @@ const LoginPage: Page = () => {
 
   const submit = async () => {
     try {
-      const isLogin = await login(email, password);
+      const isLogin = await gatewayClient.login(email, password);
       if (!isLogin) {
         await loginToast(false);
       } else {
-        const user = (await getCurrentUser()) as User;
-        const userImage = await getCurrentUserAvatar();
+        const user = (await gatewayClient.getCurrentUser()) as User;
+        const userImage = await gatewayClient.getCurrentUserAvatar();
         if (userImage) user.avatarUrl = userImage;
         Cookies.set("user", JSON.stringify(user));
         await loginToast(true);

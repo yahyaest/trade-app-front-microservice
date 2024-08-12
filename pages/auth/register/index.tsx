@@ -7,12 +7,7 @@ import { GetServerSideProps } from "next";
 import { Page } from "../../../types/types";
 import AppConfig from "../../../layout/AppConfig";
 import { LayoutContext } from "../../../layout/context/layoutcontext";
-import {
-  register,
-  getCurrentUser,
-  uploadImage,
-  getCurrentUserAvatar,
-} from "@/services";
+import GatewayClient from "@/services/gateway";
 import { User } from "@/models/user";
 import { Button } from "primereact/button";
 import { Password } from "primereact/password";
@@ -22,6 +17,7 @@ import { FileUpload } from "primereact/fileupload";
 import { Toast } from "primereact/toast";
 
 const LoginPage: Page = () => {
+  const gatewayClient = new GatewayClient();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -71,15 +67,19 @@ const LoginPage: Page = () => {
         genericToast("error", "Password", "Passwords does not match");
         return;
       }
-      const { isRegister, message } = await register(username, email, password);
+      const { isRegister, message } = await gatewayClient.register(
+        username,
+        email,
+        password
+      );
       if (!isRegister) {
         genericToast("error", "Register Failed", message);
       } else {
-        const user = (await getCurrentUser()) as User;
+        const user = (await gatewayClient.getCurrentUser()) as User;
         // upload image
         if (file) {
-          await uploadImage(file, user?.email as string);
-          const userImage = await getCurrentUserAvatar();
+          await gatewayClient.uploadImage(file, user?.email as string);
+          const userImage = await gatewayClient.getCurrentUserAvatar();
           if (userImage) user.avatarUrl = userImage;
         }
         Cookies.set("user", JSON.stringify(user));
