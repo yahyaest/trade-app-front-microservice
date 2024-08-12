@@ -3,6 +3,8 @@ import { GetServerSideProps } from "next";
 import { Page } from "../../types/types";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
+import { CustomLogger } from "@/utils/logger";
+import TaskClient from "@/services/task";
 import TaskArgs from "@/components/taskArgs";
 import { Task } from "@/models/task";
 import { User } from "@/models/user";
@@ -15,9 +17,9 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { InputNumber } from "primereact/inputnumber";
 import { Dropdown } from "primereact/dropdown";
 import { Checkbox } from "primereact/checkbox";
-import { addTask } from "@/services/task";
 
 const TasksPage: Page = (props: any) => {
+  const taskClient = new TaskClient();
   const { error } = props;
 
   const [loading, setLoading] = useState<boolean>(true);
@@ -96,7 +98,7 @@ const TasksPage: Page = (props: any) => {
         args: taskArgs,
         retry_number: retryNumber ? retryNumber : 0,
       };
-      await addTask(token, payload);
+      await taskClient.addTask(token, payload);
       await createTaskToast(taskName, true);
       router.reload();
     } catch (error: any) {
@@ -280,10 +282,12 @@ const TasksPage: Page = (props: any) => {
 export const getServerSideProps: GetServerSideProps<{}> = async (
   context: any
 ) => {
+  const logger = new CustomLogger();
   try {
     const token = context.req.cookies["token"];
 
     if (!token) {
+      logger.warn("No token was provided. Redirecting to login page");
       return {
         redirect: {
           destination: "/auth/login",
@@ -296,6 +300,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       props: {},
     };
   } catch (error: any) {
+    logger.error(`Error in task page: ${error.message}`);
     return {
       props: { error: error.message },
     };
