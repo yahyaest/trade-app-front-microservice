@@ -3,18 +3,16 @@ import { useRouter } from "next/router";
 import Cookies from "js-cookie";
 import UserContext from "@/store/user-context";
 import socketClient from "@/tools/websocket";
-import {
-  getUserNotifications,
-  updateNotification,
-} from "@/services/notification";
 import { formatRelativeTime } from "@/utils/utils";
+import NotificationClient from "@/services/notification";
+import { Notification } from "@/models/notification";
 import { Avatar } from "primereact/avatar";
 import { Badge } from "primereact/badge";
 import { Button } from "primereact/button";
-import { Notification } from "@/models/notification";
 import styles from "./notifications.module.css";
 
 export default function NotificationComponent(props: any) {
+  const notificationClient = new NotificationClient();
   const userCtx = useContext(UserContext);
   const router = useRouter();
   const [notifications, setNofications] = useState<Notification[]>([]);
@@ -55,7 +53,7 @@ export default function NotificationComponent(props: any) {
 
   const getNotifications = async () => {
     let userNotifications: Notification[] = userCtx?.user
-      ? await getUserNotifications(userCtx?.user.email)
+      ? await notificationClient.getUserNotifications(userCtx?.user.email)
       : null;
     if (userNotifications) {
       userNotifications = userNotifications.sort(
@@ -89,9 +87,12 @@ export default function NotificationComponent(props: any) {
   useEffect(() => {
     if (hovering) {
       const id = setTimeout(async () => {
-        await updateNotification(hoveredNotification?.id as number, {
-          seen: true,
-        });
+        await notificationClient.updateNotification(
+          hoveredNotification?.id as number,
+          {
+            seen: true,
+          }
+        );
       }, 3000);
       setTimer(id);
     } else {

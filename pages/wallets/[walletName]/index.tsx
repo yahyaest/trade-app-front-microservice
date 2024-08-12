@@ -548,7 +548,6 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
 ) => {
   const logger = new CustomLogger();
   try {
-    const logger = new CustomLogger();
     const token = context.req.cookies["token"];
     const user = context.req.cookies["user"];
     const username = JSON.parse(user).email;

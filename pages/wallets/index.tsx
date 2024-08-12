@@ -8,7 +8,7 @@ import { CustomLogger } from "@/utils/logger";
 import { formatCurrency } from "@/utils/utils";
 import AppConfig from "../../layout/AppConfig";
 import WalletClient from "@/services/wallet";
-import { addUserNotification } from "@/services/notification";
+import NotificationClient from "@/services/notification";
 import AddWalletModal from "@/components/addWalletModal";
 import { User } from "@/models/user";
 import { Wallet } from "@/models/wallet";
@@ -22,6 +22,7 @@ import { DataView } from "primereact/dataview";
 import { Tag } from "primereact/tag";
 
 const WalletsPage: Page = (props: any) => {
+  const notificationClient = new NotificationClient();
   const { error } = props;
   const wallets: Wallet[] = props.wallets;
 
@@ -57,7 +58,7 @@ const WalletsPage: Page = (props: any) => {
       userEmail: user.email,
       userImage: (user.avatarUrl as string).split("/")[3],
     };
-    return addUserNotification(notificationPayload);
+    return notificationClient.addUserNotification(notificationPayload);
   };
 
   const handleCreateWalletButton = async () => {

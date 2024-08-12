@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import NotificationClient from "@/services/notification";
 import { Notification } from "@/models/notification";
-import { deleteNotification, updateNotification } from "@/services/notification";
-import { DataTable, DataTableFilterMeta } from "primereact/datatable";
+import { DataTable } from "primereact/datatable";
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
-import { FilterMatchMode, FilterOperator } from "primereact/api";
 import { MultiSelect } from "primereact/multiselect";
 
 export default function NotificationDataTable(props: any) {
+  const notificationClient = new NotificationClient();
   const notifications: Notification[] = props.notifications;
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(true);
@@ -17,7 +16,6 @@ export default function NotificationDataTable(props: any) {
   useEffect(() => {
     if (notifications) setLoading(false);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
 
   const userBodyTemplate = (rowData: Notification) => {
     return (
@@ -94,7 +92,7 @@ export default function NotificationDataTable(props: any) {
           size="small"
           rounded
           onClick={async () => {
-            await updateNotification(rowData?.id as number, {
+            await notificationClient.updateNotification(rowData?.id as number, {
               seen: true,
             });
             router.push("/notifications");
@@ -113,7 +111,7 @@ export default function NotificationDataTable(props: any) {
         size="small"
         rounded
         onClick={async () => {
-          await deleteNotification(rowData?.id as number);
+          await notificationClient.deleteNotification(rowData?.id as number);
           router.push("/notifications");
         }}
       />

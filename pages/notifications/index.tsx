@@ -1,8 +1,9 @@
 import React from "react";
 import { GetServerSideProps } from "next";
-import NotificationDataTable from "@/components/notificationsDataTable";
-import { getUserNotifications } from "@/services/notification";
+import { CustomLogger } from "@/utils/logger";
 import { formatRelativeTime } from "@/utils/utils";
+import NotificationClient from "@/services/notification";
+import NotificationDataTable from "@/components/notificationsDataTable";
 import { Notification } from "@/models/notification";
 import { User } from "@/models/user";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -21,9 +22,7 @@ const NotificationPage = (props: any) => {
       </h1>
 
       <div className="card mx-5">
-        <NotificationDataTable
-          notifications={notifications}
-        />
+        <NotificationDataTable notifications={notifications} />
       </div>
     </div>
   );
@@ -32,11 +31,14 @@ const NotificationPage = (props: any) => {
 export const getServerSideProps: GetServerSideProps<{}> = async (
   context: any
 ) => {
+  const logger = new CustomLogger();
   try {
+    const notificationClient = new NotificationClient("server");
     const token = context.req.cookies["token"];
     const user: User = JSON.parse(context.req.cookies["user"]);
 
     if (!token || !user) {
+      logger.warn("No token or user was provided. Redirecting to login page");
       return {
         redirect: {
           destination: "/auth/login",
@@ -48,10 +50,8 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
     // Get user notifications
 
     const getNotifications = async () => {
-      let userNotifications: Notification[] = await getUserNotifications(
-        user.email,
-        token
-      );
+      let userNotifications: Notification[] =
+        await notificationClient.getUserNotifications(user.email, token);
       if (userNotifications) {
         userNotifications = userNotifications.sort(
           (a: Notification, b: Notification) =>
@@ -68,12 +68,17 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       return userNotifications;
     };
 
+    logger.info(`Fetching Notifications for user: ${user.email}`);
     const notifications = await getNotifications();
+    logger.info(
+      `Found ${notifications.length} Notifications for user: ${user.email}`
+    );
 
     return {
       props: { notifications },
     };
   } catch (error: any) {
+    logger.error(`Error fetching Notifications : ${error.message}`);
     return {
       props: { error: error.message },
     };
