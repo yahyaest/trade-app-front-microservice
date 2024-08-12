@@ -41,6 +41,7 @@ const WalletPage: Page = (props: any) => {
   const { lastWeekTransactionsNumber, lastWeekAssetsNumber } = props;
   const [bestAssets, setBestAssets] = useState<Asset[]>([]);
   const [leastAssets, setLeastAssets] = useState<Asset[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [windowSize, setWindowSize] = useState<string>("xlg");
   const margin = (
     ((+wallet?.currentValue + nonSoldAssetsValue - +wallet?.intialValue) /
@@ -97,8 +98,6 @@ const WalletPage: Page = (props: any) => {
     setBestAssets(gainAssets);
     setLeastAssets(lostAssets);
   };
-
-  const [loading, setLoading] = useState<boolean>(true);
 
   const router = useRouter();
   const toast: any = useRef(null);
@@ -553,8 +552,10 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
     const token = context.req.cookies["token"];
     const user = context.req.cookies["user"];
     const username = JSON.parse(user).email;
-    const walletClient = new WalletClient();
-    const cryptoClient = new CryptoClient();
+    const cryptoClientSource = "server";
+    const walletClientSource = "server";
+    const walletClient = new WalletClient(walletClientSource);
+    const cryptoClient = new CryptoClient(cryptoClientSource);
 
     if (!token) {
       logger.warn("No token was provided. Redirecting to login page");
@@ -661,10 +662,16 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
         const hoursDifference = timeDifference / (1000 * 60 * 60);
 
         if (hoursDifference > 1) {
-          const currentCoin: CryptoCoin = await cryptoClient.getCoin(
+          let currentCoin: CryptoCoin = await cryptoClient.getCoin(
             token,
             assetCoin.id
           );
+          if (!currentCoin) {
+            logger.warn(
+              `Failed to retreive ${assetCoin.name} current data from "api.coinranking.com".Using latest saved coin data ...`
+            );
+            currentCoin = assetCoin;
+          }
           logger.info(
             `Successfully fetched ${
               assetCoin.name
@@ -788,7 +795,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
       },
     };
   } catch (error: any) {
-    logger.error(`Error fetching coins data: ${error.message}`);
+    logger.error(`Error fetching wallet dashboard data: ${error.message}`);
     return {
       props: { error: error.message },
     };

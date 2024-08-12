@@ -6,11 +6,34 @@ class WalletClient {
   private baseUrl: string;
   private logger;
   private cryptoClient: CryptoClient;
+  public source?: string;
 
-  constructor() {
+  constructor(source?: string) {
     this.baseUrl = process.env.BASE_URL || "";
     this.logger = new CustomLogger();
     this.cryptoClient = new CryptoClient();
+    this.source = source;
+  }
+
+  serverLogger(level: "info" | "debug" | "warn" | "error", message: string) {
+    if (this.source === "server") {
+      switch (level) {
+        case "info":
+          this.logger.info(message);
+          break;
+        case "debug":
+          this.logger.debug(message);
+          break;
+        case "warn":
+          this.logger.warn(message);
+          break;
+        case "error":
+          this.logger.error(message);
+          break;
+        default:
+          break;
+      }
+    }
   }
 
   async getAssets(token: string, query: any) {
@@ -131,6 +154,11 @@ class WalletClient {
     try {
       const walletsUrl = `${this.baseUrl}/trade-wallet/api/wallets/?name=${walletName}`;
 
+      this.serverLogger(
+        "info",
+        `Making GET request to /trade-wallet/api/wallets/?name=${walletName}`
+      );
+
       if (!token) {
         throw Error("No token was provided. Failed to get wallets data");
       }
@@ -142,6 +170,13 @@ class WalletClient {
 
       const walletsRersponse = await axios.get(walletsUrl, options);
       let wallets = walletsRersponse.data;
+
+      this.serverLogger(
+        "info",
+        `GET Request to /trade-wallet/api/wallets/?name=${walletName} procecced with response ${walletsRersponse.status}`
+      );
+
+
       return wallets[0];
     } catch (error) {
       this.logger.error(`Error fetching wallet: ${error}`);

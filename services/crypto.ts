@@ -3,10 +3,33 @@ import { CustomLogger } from "@/utils/logger";
 class CryptoClient {
   private baseUrl: string;
   private logger;
+  public source?: string;
 
-  constructor() {
+  constructor(source?: string) {
     this.baseUrl = process.env.BASE_URL || "";
     this.logger = new CustomLogger();
+    this.source = source;
+  }
+
+  serverLogger(level: "info" | "debug" | "warn" | "error", message: string) {
+    if (this.source === "server") {
+      switch (level) {
+        case "info":
+          this.logger.info(message);
+          break;
+        case "debug":
+          this.logger.debug(message);
+          break;
+        case "warn":
+          this.logger.warn(message);
+          break;
+        case "error":
+          this.logger.error(message);
+          break;
+        default:
+          break;
+      }
+    }
   }
 
   async getTransactions(token: string, query: any = {}) {
@@ -132,14 +155,21 @@ class CryptoClient {
 
       return coin;
     } catch (error: any) {
-      this.logger.error(`Error fetching coin : ${error.response.data.message}`);
-      throw Error(`Error fetching coin data. ${error.response.data.message}`);
+      this.logger.error(
+        `Error fetching coin with id ${id} : ${error.response.data.message}`
+      );
+      // throw Error(`Error fetching coin data. ${error.response.data.message}`);
     }
   }
 
   async getCoinByName(token: string, name: string) {
     try {
       const coinsUrl = `${this.baseUrl}/trade-crypto/api/coins/?name=${name}`;
+
+      this.serverLogger(
+        "info",
+        `Making GET request to /trade-crypto/api/coins/?name=${name}`
+      );
 
       if (!token) {
         throw Error("No token was provided. Failed to get coin data");
@@ -150,6 +180,12 @@ class CryptoClient {
         },
       };
       const response = await axios.get(coinsUrl, options);
+
+      this.serverLogger(
+        "info",
+        `GET Request to /trade-crypto/api/coins/?name=${name} procecced with response ${response.status}`
+      );
+
       const coin = response.data[0];
 
       return coin;
@@ -204,7 +240,10 @@ class CryptoClient {
 
       return coinsList;
     } catch (error: any) {
-      this.logger.error("Error fetching coins List:", error.response.data.message);
+      this.logger.error(
+        "Error fetching coins List:",
+        error.response.data.message
+      );
       throw Error(
         `Error fetching coins List data: ${error.response.data.message}`
       );
