@@ -18,10 +18,11 @@ export const logger: Logger = pino({
           colorize: true,
           translateTime: "yyyy-mm-dd'T'HH:MM:ss.l'Z'",
         },
+        level: "trace",
       },
     ],
   },
-  level: "debug",
+  level: "trace",
 });
 
 const loggerDetails = () => {
