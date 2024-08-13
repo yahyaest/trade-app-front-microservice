@@ -14,7 +14,7 @@ export default function CoinChart(props: any) {
   const [chartData, setChartData] = useState({});
   const [chartOptions, setChartOptions] = useState({});
   const [chartType, setChartType] = useState<string>("line");
-  const [currentVerticalData, setCurrentVerticalData] = 
+  const [currentVerticalData, setCurrentVerticalData] =
     useState<any[]>(initialVerticalData);
   const [currentHorizentalData, setCurrentHorizentalData] = useState<any[]>(
     initialHorizentalData
@@ -272,7 +272,7 @@ export default function CoinChart(props: any) {
           {timeline.map((e) => (
             <div
               key={e}
-              className={` my-1 p-1 px-1 sm:px-3 ${styles.test} duration-${e}`}
+              className={` my-1 p-1 px-1 sm:px-3 ${styles.chart_option_element} duration-${e}`}
               onClick={async () => {
                 setIsDataLoading(true);
                 changeBackgroundColor(`duration-${e}`, "duration");
@@ -294,7 +294,9 @@ export default function CoinChart(props: any) {
           {chartTypes.map((e) => (
             <div
               key={e}
-              className={` my-1 p-1 px-3 ${styles.test} type-${e} ${
+              className={` my-1 p-1 px-3 ${
+                styles.chart_option_element
+              } type-${e} ${
                 e === "bar" ? "pi pi-chart-bar" : "pi pi-chart-line"
               }`}
               onClick={() => {

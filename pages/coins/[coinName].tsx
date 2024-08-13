@@ -7,7 +7,7 @@ import AppConfig from "../../layout/AppConfig";
 import { CustomLogger } from "@/utils/logger";
 import { Wallet } from "@/models/wallet";
 import CryptoClient from "@/services/crypto";
-import { getUserWallets } from "@/services";
+import WalletClient from "@/services/wallet";
 import CoinChart from "@/components/coinChart";
 import CoinInfos from "@/components/coinInfos";
 import CoinHeader from "@/components/coinHeader";
@@ -18,6 +18,7 @@ import { Toast } from "primereact/toast";
 import styles from "./coinDetails.module.css";
 
 const CoinDetailPage: Page = (props: any) => {
+  const walletClient = new WalletClient();
   const { coinChartData, initialVerticalData, initialHorizentalData, error } =
     props;
   const coin: CryptoCoin = props.coin;
@@ -41,7 +42,7 @@ const CoinDetailPage: Page = (props: any) => {
   const HandleBuyButton = async () => {
     try {
       const token = Cookies.get("token") as string;
-      let wallets: Wallet[] = await getUserWallets(token);
+      let wallets: Wallet[] = await walletClient.getUserWallets(token);
       wallets = wallets.filter((wallet) => wallet.type === "CRYPTO");
       setUserWallets(wallets);
       setIsModal(true);
@@ -138,7 +139,9 @@ export const getServerSideProps: GetServerSideProps<{}> = async (
     logger.info(`Fetching coin data for ${coinName} ...`);
     let coin: CryptoCoin = await cryptoClient.getCoinByName(token, coinName);
     coin = await cryptoClient.getCoin(token, coin.id);
-    logger.info(`Updating coin ${coinName} with id ${coin.id} with latest price ${coin.price} $`);
+    logger.info(
+      `Updating coin ${coinName} with id ${coin.id} with latest price ${coin.price} $`
+    );
 
     const coinChartData = await cryptoClient.getCoinChartData(
       token,
