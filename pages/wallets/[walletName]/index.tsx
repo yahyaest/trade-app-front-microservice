@@ -13,6 +13,7 @@ import { Transaction } from "@/models/transaction";
 import { Asset } from "@/models/asset";
 import { CryptoCoin } from "@/models/cryptoCoin";
 import { WalletHistory } from "@/models/walletHistory";
+import RefreshPage from "@/components/refreshPage";
 import AssetDataTable from "@/components/assetDataTable";
 import TransactionDataTable from "@/components/transactionDataTable";
 import PieChart from "@/components/pieChart";
@@ -247,6 +248,7 @@ const WalletPage: Page = (props: any) => {
   return (
     <React.Fragment>
       <div className="surface-ground align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden text-center">
+        <RefreshPage refreshTime={10} />
         <Toast ref={toast} />
         <BreadCrumb model={items as any} home={home} className="my-3" />
         <h1 className="font-bold text-3xl sm:text-6xl text-yellow-500">{`${wallet.name} Dashboard`}</h1>

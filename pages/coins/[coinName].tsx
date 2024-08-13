@@ -8,6 +8,7 @@ import { CustomLogger } from "@/utils/logger";
 import { Wallet } from "@/models/wallet";
 import CryptoClient from "@/services/crypto";
 import WalletClient from "@/services/wallet";
+import RefreshPage from "@/components/refreshPage";
 import CoinChart from "@/components/coinChart";
 import CoinInfos from "@/components/coinInfos";
 import CoinHeader from "@/components/coinHeader";
@@ -81,6 +82,7 @@ const CoinDetailPage: Page = (props: any) => {
 
   return (
     <div className="surface-ground align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden text-center">
+      <RefreshPage refreshTime={1} />
       <Toast ref={toast} />
       <BreadCrumb model={items as any} home={home} className="mb-3" />
 
