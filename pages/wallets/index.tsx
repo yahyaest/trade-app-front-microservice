@@ -126,6 +126,7 @@ const WalletsPage: Page = (props: any) => {
                 severity="danger"
                 onClick={() => {
                   router.push(`/wallets/${wallet.name}`);
+                  setLoading(true);
                 }}
                 rounded
               ></Button>
