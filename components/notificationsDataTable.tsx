@@ -22,7 +22,7 @@ export default function NotificationDataTable(props: any) {
       <React.Fragment>
         <img
           alt={rowData.sender}
-          src={`${process.env.GATEWAY_BASE_URL}/${rowData.userImage}`}
+          src={`${process.env.BASE_URL}/${rowData.userImage}`}
           onError={(e) =>
             (e.currentTarget.src =
               "https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png")
@@ -68,7 +68,7 @@ export default function NotificationDataTable(props: any) {
       <div className="p-multiselect-representative-option">
         <img
           alt={option.sender}
-          src={`${process.env.GATEWAY_BASE_URL}/${option.userImage}`}
+          src={`${process.env.BASE_URL}/${option.userImage}`}
           width={32}
           style={{ verticalAlign: "middle" }}
         />

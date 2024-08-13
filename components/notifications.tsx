@@ -166,7 +166,7 @@ export default function NotificationComponent(props: any) {
                 >
                   <div className="dropdown-menu-icon align-self-center  mt-1">
                     <Avatar
-                      image={`${process.env.GATEWAY_BASE_URL}/${notification?.userImage}`}
+                      image={`${process.env.BASE_URL}/${notification?.userImage}`}
                       shape="circle"
                       size="normal"
                       className="mx-1"
