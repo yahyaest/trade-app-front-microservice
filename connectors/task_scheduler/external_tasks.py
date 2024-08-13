@@ -28,7 +28,7 @@ async def send_websoket_message(email, message):
     """
     Sends a message to a specific user on the WebSocket server.
     """
-    server_url = f"ws://task_scheduler:8765?source={email}"
+    server_url = f"ws://task-scheduler:8765?source={email}"
     async with websockets.connect(server_url) as websocket:
         try:
             await websocket.send(message)

@@ -8,9 +8,9 @@ from task_scheduler_app.tools.helpers import *
 
 class Crypto:
     def __init__(self) -> None:
-        self.crypto_base_url = os.getenv('CRYPTO_BASE_URL')
-        self.coins_url = f'{self.crypto_base_url}/api/coins'
-        self.transactions_url = f'{self.crypto_base_url}/api/transactions'
+        self.base_url = os.getenv('BASE_URL')
+        self.coins_url = f'{self.base_url}/trade-crypto/api/coins'
+        self.transactions_url = f'{self.base_url}/trade-crypto/api/transactions'
         self.token = None
     
     def get_coins(self):

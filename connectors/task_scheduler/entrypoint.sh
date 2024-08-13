@@ -28,6 +28,7 @@ crypto_ip=$(getent hosts crypto | awk '{ print $1 }')
 wallet_ip=$(getent hosts wallet | awk '{ print $1 }')
 task_scheduler_ip=$(getent hosts task_scheduler | awk '{ print $1 }')
 
+export BASE_URL=http://$gateway_ip:3000
 export GATEWAY_BASE_URL=http://$gateway_ip:3000
 export NOTIFICATION_BASE_URL=http://$notification_ip:8000
 export CRYPTO_BASE_URL=http://$crypto_ip:3000

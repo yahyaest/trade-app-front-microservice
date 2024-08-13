@@ -8,9 +8,9 @@ from task_scheduler_app.tools.helpers import *
 
 class Notification:
     def __init__(self) -> None:
-        self.notification_base_url = os.getenv('NOTIFICATION_BASE_URL')
-        self.notification_url = f'{self.notification_base_url}/api/notifications'
-        self.bulk_notification_url = f'{self.notification_base_url}/api/bulk_notifications'
+        self.base_url = os.getenv('BASE_URL')
+        self.notification_url = f'{self.base_url}/trade-notification/api/notifications'
+        self.bulk_notification_url = f'{self.base_url}/trade-notification/api/bulk_notifications'
         self.token = None
 
     def add_user_notification(self, payload):
@@ -73,7 +73,7 @@ class Notification:
 
     def get_user_notifications(self,email):
         try:
-            notification_url = f"{self.notification_base_url}/api/notifications/?userEmail={email}"
+            notification_url = f"{self.base_url}/trade-notification/api/notifications/?userEmail={email}"
             if not self.token:
                 raise ValueError("No token was provided. Failed to post notification")
 

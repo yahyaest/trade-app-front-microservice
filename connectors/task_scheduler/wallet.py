@@ -9,10 +9,10 @@ from task_scheduler_app.tools.helpers import *
 
 class Wallet:
     def __init__(self) -> None:
-        self.wallet_base_url = os.getenv('WALLET_BASE_URL')
-        self.wallets_url = f'{self.wallet_base_url}/api/wallets'
-        self.assets_url = f'{self.wallet_base_url}/api/assets'
-        self.history_url = f'{self.wallet_base_url}/api/histories'
+        self.base_url = os.getenv('BASE_URL')
+        self.wallets_url = f'{self.base_url}/trade-wallet/api/wallets'
+        self.assets_url = f'{self.base_url}/trade-wallet/api/assets'
+        self.history_url = f'{self.base_url}/trade-wallet/api/histories'
         self.token = None
     
     def get_assets(self, query: dict = None):
