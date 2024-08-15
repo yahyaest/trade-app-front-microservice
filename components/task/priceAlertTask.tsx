@@ -60,7 +60,10 @@ const PriceAlertTask = (props: any) => {
       e.value.name
     );
     const oldCoinPrice = +coin.price;
-    const currentCoin: CryptoCoin = await cryptoClient.getCoin(token, coin.id);
+    let currentCoin: CryptoCoin = await cryptoClient.getCoin(token, coin.id);
+    if (!currentCoin) {
+      currentCoin = coin;
+    }
     const newCoinPrice = +currentCoin.price;
     const priceMargin = (
       ((newCoinPrice - oldCoinPrice) / oldCoinPrice) *

@@ -14,7 +14,7 @@ const getFilteredData = (
   duration: string
 ) => {
   const now = new Date() as any;
-  let startDate;
+  let startDate : any;
 
   switch (duration) {
     case "1h":
