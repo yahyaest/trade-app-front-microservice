@@ -1,17 +1,19 @@
 import axios from "axios";
-import { getToken, getUserByEmail } from "./gateway";
 import Cookies from "js-cookie";
 import { CustomLogger } from "@/utils/logger";
+import GatewayClient from "./gateway";
 
 class NotificationClient {
   private baseUrl: string;
   private logger;
   private cookies: any;
+  private gatewayClient: GatewayClient;
   public source?: string;
 
   constructor(source?: string) {
     this.baseUrl = process.env.BASE_URL || "";
     this.logger = new CustomLogger();
+    this.gatewayClient = new GatewayClient();
     this.source = source;
 
     if (typeof window === "undefined") {
@@ -84,7 +86,7 @@ class NotificationClient {
       // Get Product Owner User
       const signinPayload = appSigninPayload;
 
-      const appToken = await getToken(
+      const appToken = await this.gatewayClient.getToken(
         signinPayload.email,
         signinPayload.password
       );
@@ -93,7 +95,10 @@ class NotificationClient {
         throw Error("No token was provided. Failed to post notification");
       }
 
-      const productOwnerUser = await getUserByEmail(productOwner, appToken);
+      const productOwnerUser = await this.gatewayClient.getUserByEmail(
+        productOwner,
+        appToken
+      );
       // const productOwnerImage = await getUserAvatar(productOwnerUser?.email as string ,appToken)
 
       // Post notification
