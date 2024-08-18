@@ -1,3 +1,4 @@
+from nis import cat
 import time
 import random
 import glob
@@ -28,7 +29,7 @@ async def send_websoket_message(email, message):
     """
     Sends a message to a specific user on the WebSocket server.
     """
-    server_url = f"ws://task-scheduler:8765?source={email}"
+    server_url = f"ws://websocket:8765/ws?source={email}"
     async with websockets.connect(server_url) as websocket:
         try:
             await websocket.send(message)
@@ -121,6 +122,8 @@ def price_alert(self, *args, **kwargs):
         crypto = Crypto()
         crypto.token = token
         coin = crypto.get_coin(coin_id=coin_id)
+        if not coin:
+            coin = crypto.get_coin_by_name(coin_name)
         current_coin_price = coin.get("price", None)
         
         if price_direction == "over" and float(current_coin_price) <= float(price_alert):
@@ -136,6 +139,12 @@ def price_alert(self, *args, **kwargs):
         user = kwargs.get("user", None)
         notification = Notification()
         notification.token = token
+        try:
+            user_image = user.get('avatarUrl', None).split(os.getenv('BASE_URL'))[1]
+            if user_image.startswith("/"):
+                user_image = user_image[1:]
+        except:
+            user_image = user.get('avatarUrl', None)
         notification_payload = {
             "message": f"The coin {coin_name} with price alert {'over' if price_direction == 'over' else 'under'} {round(price_alert, 2)} $ has reached the price of {round(float(current_coin_price), 2)} $",
             "sender": user.get('email', None),
@@ -143,7 +152,7 @@ def price_alert(self, *args, **kwargs):
             "userId": user.get('id', None),
             "username": user.get('username', None),
             "userEmail": user.get('email', None),
-            "userImage": user.get('avatarUrl', None).split("/")[-1],
+            "userImage": user_image,
             "externalArgs": json.dumps({"sender_name" : user.get('username', None)})
         }
         notification = notification.add_user_notification(payload=notification_payload)
@@ -295,6 +304,8 @@ def buy_crypto_coin(self, *args, **kwargs):
         wallet = wallet_connector.get_wallet(wallet_id) # Get latest wallet info
         wallet_current_value = float(wallet.get('currentValue', None))
         coin = crypto.get_coin(coin_id=coin.get('id', None)) # Get latest coin info
+        if not coin:
+            coin = crypto.get_coin_by_name(coin.get('name', None))
         logger.info(f"Coin price: {coin.get('price', None)}")
         transaction_cost = float(coin.get('price', None)) * coin_amount
         logger.info(f"Transaction cost: {transaction_cost}")
@@ -356,6 +367,12 @@ def buy_crypto_coin(self, *args, **kwargs):
         logger.info(f"Sending buy crypto coin notification for coin {coin.get('name', None)}")
         notification = Notification()
         notification.token = token
+        try:
+            user_image = user.get('avatarUrl', None).split(os.getenv('BASE_URL'))[1]
+            if user_image.startswith("/"):
+                user_image = user_image[1:]
+        except:
+            user_image = user.get('avatarUrl', None)
         notification_payload = {
             "message": f"Bought {coin_amount} {coin.get('name', None)} for wallet {wallet.get('name', None)} at a total cost of {round(transaction_cost, 2)} $",
             "sender": user.get('email', None),
@@ -363,7 +380,7 @@ def buy_crypto_coin(self, *args, **kwargs):
             "userId": user.get('id', None),
             "username": user.get('username', None),
             "userEmail": user.get('email', None),
-            "userImage": user.get('avatarUrl', None).split("/")[-1],
+            "userImage": user_image,
             "externalArgs": json.dumps({"sender_name" : user.get('username', None)})
         }
         

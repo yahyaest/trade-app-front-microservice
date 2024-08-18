@@ -49,6 +49,12 @@ const WalletsPage: Page = (props: any) => {
       ? JSON.parse(Cookies.get("user") as string)
       : null;
     if (!user) return;
+    let userImage = user.avatarUrl
+      ? process.env.BASE_URL
+        ? user.avatarUrl.split(process.env.BASE_URL)[1]
+        : user.avatarUrl
+      : "";
+    if (userImage[0] === "/") userImage = userImage.slice(1);
     const notificationPayload: Notification = {
       message,
       sender: user.email,
@@ -56,14 +62,14 @@ const WalletsPage: Page = (props: any) => {
       userId: user.id,
       username: user.username,
       userEmail: user.email,
-      userImage: (user.avatarUrl as string).split("/")[3],
+      userImage: userImage,
     };
     return notificationClient.addUserNotification(notificationPayload);
   };
 
   const handleCreateWalletButton = async () => {
     await createNotification(
-      "User clicked on create wallet button",
+      "You created a new wallet",
       "Create Wallet"
     );
     setIsModal(true);

@@ -8,11 +8,14 @@ export default function socketClient(
     ? (JSON.parse(Cookies.get("user") as string) as User)
     : null;
   const email = user?.email;
-  const socketUrl = `ws:${
-    process.env.TASK_SCHEDULER_BASE?.replace("http", "")
-      .replace("https", "")
-      .split(":")[1]
-  }:8765/?email=${email}`;
+  // const socketUrl = `ws:${
+  //   process.env.WEBSOCKET_BASE_URL?.replace("http", "")
+  //     .replace("https", "")
+  //     .split(":")[1]
+  // }:8765/ws?email=${email}`;
+  const socketProtocol = process.env.ENV === "DEV" ? "ws" : "wss";
+  const socketUrl = `${socketProtocol}:${
+    process.env.BASE_URL?.replace("http://", "").replace("https://", "")}/ws?email=${email}`;
   const socket = new WebSocket(socketUrl);
 
   socket.onopen = function () {

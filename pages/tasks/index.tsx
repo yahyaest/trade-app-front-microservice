@@ -268,7 +268,8 @@ const TasksPage: Page = (props: any) => {
         raised
         onClick={() =>
           window.open(
-            process.env.TASK_SCHEDULER_BASE,
+            // `${process.env.BASE_URL}/task-dashboard`, // nginx location
+            process.env.TASK_SCHEDULER_BASE_URL,
             "_blank",
             "noopener,noreferrer"
           )
