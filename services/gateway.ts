@@ -38,12 +38,12 @@ class GatewayClient {
   async register(username: string, email: string, password: string) {
     try {
       const signUpUrl = `${this.baseUrl}/api/auth/signup`;
-      const redister = await axios.post(signUpUrl, {
+      const register = await axios.post(signUpUrl, {
         username,
         email,
         password,
       });
-      const token = redister.data.access_token;
+      const token = register.data.access_token;
       if (!token)
         return { isRegister: false, message: "No token was provided" };
       Cookies.set("token", token);
